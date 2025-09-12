@@ -16,6 +16,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ForgotPasswordDialog } from '@/components/auth/forgot-password-dialog';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign In | Trackify',
+};
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),

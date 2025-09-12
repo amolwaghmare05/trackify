@@ -15,6 +15,11 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign Up | Trackify',
+};
 
 const signUpSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
