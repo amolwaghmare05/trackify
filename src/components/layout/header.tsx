@@ -26,9 +26,9 @@ export function Header({ onAddGoal }: HeaderProps) {
     router.push('/sign-in');
   };
   
-  const getInitials = (email: string | null | undefined) => {
-    if (!email) return 'U';
-    return email.charAt(0).toUpperCase();
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -49,14 +49,14 @@ export function Header({ onAddGoal }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                      <AvatarFallback>{getInitials(user.displayName || user.email)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">My Account</p>
+                      <p className="text-sm font-medium leading-none">{user.displayName || 'My Account'}</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user.email}
                       </p>

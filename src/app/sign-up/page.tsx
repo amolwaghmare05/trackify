@@ -1,4 +1,3 @@
-// src/app/sign-up/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -17,6 +16,7 @@ import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const signUpSchema = z.object({
+  username: z.string().min(3, { message: 'Username must be at least 3 characters.'}),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
@@ -30,6 +30,7 @@ export default function SignUpPage() {
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
+      username: '',
       email: '',
       password: '',
     },
@@ -50,7 +51,7 @@ export default function SignUpPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-          <CardDescription>Enter your email and password to sign up.</CardDescription>
+          <CardDescription>Enter your details to sign up.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -62,6 +63,19 @@ export default function SignUpPage() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="your_username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"

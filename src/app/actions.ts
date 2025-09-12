@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  updateProfile,
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { z } from 'zod';
@@ -29,6 +30,13 @@ const authSchema = z.object({
 
 type AuthInput = z.infer<typeof authSchema>;
 
+const signUpSchema = authSchema.extend({
+    username: z.string().min(3),
+});
+
+type SignUpInput = z.infer<typeof signUpSchema>;
+
+
 export async function signInWithEmail(data: AuthInput): Promise<{ error?: string }> {
   try {
     const auth = getAuth(app);
@@ -39,10 +47,13 @@ export async function signInWithEmail(data: AuthInput): Promise<{ error?: string
   }
 }
 
-export async function signUpWithEmail(data: AuthInput): Promise<{ error?: string }> {
+export async function signUpWithEmail(data: SignUpInput): Promise<{ error?: string }> {
   try {
     const auth = getAuth(app);
-    await createUserWithEmailAndPassword(auth, data.email, data.password);
+    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+    await updateProfile(userCredential.user, {
+        displayName: data.username
+    });
     return {};
   } catch (error: any) {
     return { error: error.message };
