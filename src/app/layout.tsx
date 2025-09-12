@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/auth-context';
+import { Sidebar, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarNav } from '@/components/layout/sidebar-nav';
 
 export const metadata: Metadata = {
   title: 'Trackify',
@@ -22,7 +24,16 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          {children}
+          <SidebarProvider>
+            <div className="flex min-h-screen">
+              <Sidebar>
+                <SidebarNav />
+              </Sidebar>
+              <SidebarInset>
+                {children}
+              </SidebarInset>
+            </div>
+          </SidebarProvider>
         </AuthProvider>
         <Toaster />
       </body>

@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { SidebarTrigger } from '../ui/sidebar';
 
 interface HeaderProps {
   onAddGoal: () => void;
@@ -37,6 +38,7 @@ export function Header({ onAddGoal }: HeaderProps) {
   return (
     <header className="flex items-center justify-between p-4 bg-card text-card-foreground border-b">
       <div className="flex items-center gap-2">
+        <SidebarTrigger />
         <Target className="h-8 w-8 text-primary" />
         <h1 className="text-2xl font-bold font-headline text-primary">Trackify</h1>
       </div>
