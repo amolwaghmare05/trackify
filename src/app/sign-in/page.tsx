@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,11 +16,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ForgotPasswordDialog } from '@/components/auth/forgot-password-dialog';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Sign In | Trackify',
-};
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -48,6 +43,10 @@ export default function SignInPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Sign In | Trackify';
+  }, []);
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
