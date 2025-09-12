@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -18,6 +19,7 @@ export default function Home() {
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
 
   useEffect(() => {
+    // Only redirect if loading is complete and there's no user.
     if (!loading && !user) {
       router.push('/sign-in');
     }
@@ -85,12 +87,19 @@ export default function Home() {
   const activeGoals = useMemo(() => goals.filter(g => !g.isCompleted).sort((a,b) => a.targetDate.getTime() - b.targetDate.getTime()), [goals]);
   const completedGoals = useMemo(() => goals.filter(g => g.isCompleted).sort((a,b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0)), [goals]);
   
-  if (loading || !user) {
+  // Display loading indicator while auth state is being determined.
+  if (loading) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
         <p>Loading...</p>
       </div>
     );
+  }
+
+  // If not loading and still no user, the useEffect will handle the redirect.
+  // We can return null or a minimal layout to avoid a flash of content.
+  if (!user) {
+    return null;
   }
 
   return (
