@@ -124,7 +124,7 @@ export default function SignUpPage() {
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? 'Creating Account...' : 'Sign Up'}
-              </button>
+              </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
