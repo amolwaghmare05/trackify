@@ -27,6 +27,7 @@ const getFirebaseAuthErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
     case 'auth/wrong-password':
     case 'auth/user-not-found':
+    case 'auth/invalid-credential':
       return 'Invalid credentials. Please check your email and password.';
     case 'auth/invalid-email':
       return 'Please enter a valid email address.';
