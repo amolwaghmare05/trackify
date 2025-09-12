@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { ForgotPasswordDialog } from '@/components/auth/forgot-password-dialog';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -41,6 +42,7 @@ const getFirebaseAuthErrorMessage = (errorCode: string): string => {
 export default function SignInPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -62,62 +64,78 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Sign In</CardTitle>
-          <CardDescription>Enter your credentials to access your account.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Sign In Failed</AlertTitle>
+    <>
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-headline">Sign In</CardTitle>
+            <CardDescription>Enter your credentials to access your account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Sign In Failed</AlertTitle>
 
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter your password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
-              </Button>
-            </form>
-          </Form>
-          <div className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
-            <Link href="/sign-up" className="underline">
-              Sign up
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="Enter your email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="h-auto p-0 text-sm"
+                          onClick={() => setIsForgotPasswordOpen(true)}
+                        >
+                          Forgot Password?
+                        </Button>
+                      </div>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter your password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4 text-center text-sm">
+              Don't have an account?{' '}
+              <Link href="/sign-up" className="underline">
+                Sign up
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <ForgotPasswordDialog 
+        isOpen={isForgotPasswordOpen}
+        onOpenChange={setIsForgotPasswordOpen}
+      />
+    </>
   );
 }
