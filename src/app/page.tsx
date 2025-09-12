@@ -8,49 +8,62 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
 import { Trophy } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/sign-in');
+    }
+  }, [user, loading, router]);
+
+
   // Hydration fix for initial data
   useEffect(() => {
-    setGoals([
-      {
-        id: '1',
-        title: 'Learn Next.js',
-        description: 'Complete a comprehensive course and build a project.',
-        targetDate: new Date('2024-12-31'),
-        progress: 25,
-        isCompleted: false,
-      },
-      {
-        id: '2',
-        title: 'Run a 5k',
-        description: 'Train consistently and participate in a local 5k race.',
-        targetDate: new Date('2024-09-30'),
-        progress: 60,
-        isCompleted: false,
-      },
-      {
-        id: '3',
-        title: 'Read 12 Books',
-        description: 'Finish one book per month for the rest of the year.',
-        targetDate: new Date('2024-12-31'),
-        progress: 50,
-        isCompleted: false,
-      },
-      {
-        id: '4',
-        title: 'Meditate Daily',
-        description: 'Practice mindfulness for 10 minutes every day.',
-        targetDate: new Date('2024-08-31'),
-        progress: 90,
-        isCompleted: true,
-        completedAt: new Date('2024-07-20'),
-      },
-    ]);
-  }, []);
+    if (user) {
+      setGoals([
+        {
+          id: '1',
+          title: 'Learn Next.js',
+          description: 'Complete a comprehensive course and build a project.',
+          targetDate: new Date('2024-12-31'),
+          progress: 25,
+          isCompleted: false,
+        },
+        {
+          id: '2',
+          title: 'Run a 5k',
+          description: 'Train consistently and participate in a local 5k race.',
+          targetDate: new Date('2024-09-30'),
+          progress: 60,
+          isCompleted: false,
+        },
+        {
+          id: '3',
+          title: 'Read 12 Books',
+          description: 'Finish one book per month for the rest of the year.',
+          targetDate: new Date('2024-12-31'),
+          progress: 50,
+          isCompleted: false,
+        },
+        {
+          id: '4',
+          title: 'Meditate Daily',
+          description: 'Practice mindfulness for 10 minutes every day.',
+          targetDate: new Date('2024-08-31'),
+          progress: 90,
+          isCompleted: true,
+          completedAt: new Date('2024-07-20'),
+        },
+      ]);
+    }
+  }, [user]);
 
   const handleAddGoal = (newGoal: Omit<Goal, 'id' | 'isCompleted' | 'progress'>) => {
     setGoals(prevGoals => [
@@ -71,6 +84,14 @@ export default function Home() {
 
   const activeGoals = useMemo(() => goals.filter(g => !g.isCompleted).sort((a,b) => a.targetDate.getTime() - b.targetDate.getTime()), [goals]);
   const completedGoals = useMemo(() => goals.filter(g => g.isCompleted).sort((a,b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0)), [goals]);
+  
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
