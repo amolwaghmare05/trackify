@@ -27,7 +27,7 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 const getFirebaseAuthErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
     case 'auth/email-already-in-use':
-      return 'This email address is already in use by another account.';
+      return 'Sign in please. This email is already in use';
     case 'auth/invalid-email':
       return 'Please enter a valid email address.';
     case 'auth/operation-not-allowed':
