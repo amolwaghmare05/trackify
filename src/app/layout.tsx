@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
-  title: 'Triumph Track',
+  title: 'Trackify',
   description: 'Your personal goal tracker to achieve greatness.',
 };
 

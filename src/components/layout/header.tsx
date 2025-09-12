@@ -38,7 +38,7 @@ export function Header({ onAddGoal }: HeaderProps) {
     <header className="flex items-center justify-between p-4 bg-card text-card-foreground border-b">
       <div className="flex items-center gap-2">
         <Target className="h-8 w-8 text-primary" />
-        <h1 className="text-2xl font-bold font-headline text-primary">Goal-Setter</h1>
+        <h1 className="text-2xl font-bold font-headline text-primary">Trackify</h1>
       </div>
       <div className="flex items-center gap-4">
         {user && (
