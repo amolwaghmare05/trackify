@@ -37,11 +37,10 @@ const signUpSchema = authSchema.extend({
 type SignUpInput = z.infer<typeof signUpSchema>;
 
 
-export async function signInWithEmail(data: AuthInput): Promise<{ error?: string }> {
+export async function signInWithEmail(data: AuthInput): Promise<{ error?: string } | void> {
   try {
     const auth = getAuth(app);
     await signInWithEmailAndPassword(auth, data.email, data.password);
-    return {};
   } catch (error: any) {
     return { error: error.message };
   }

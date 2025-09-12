@@ -38,10 +38,11 @@ export default function SignInPage() {
   const onSubmit = async (data: SignInFormValues) => {
     setError(null);
     const result = await signInWithEmail(data);
-    if (result.error) {
+    if (result?.error) {
       setError(result.error);
     } else {
       router.push('/');
+      router.refresh(); // Ensure the page re-renders with the new auth state
     }
   };
 
