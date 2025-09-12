@@ -1,6 +1,6 @@
 'use client';
 
-import { Target, PlusCircle, User, LogOut } from 'lucide-react';
+import { Target, PlusCircle, User, LogOut, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
 import { auth } from '@/lib/firebase';
@@ -32,28 +32,32 @@ export function Header({ onAddGoal }: HeaderProps) {
   
   const getInitials = (name: string | null | undefined) => {
     if (!name) return 'U';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
     return name.charAt(0).toUpperCase();
   };
 
   return (
-    <header className="flex items-center justify-between p-4 bg-card text-card-foreground border-b">
+    <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
-        <SidebarTrigger />
-        <Target className="h-8 w-8 text-primary" />
-        <h1 className="text-2xl font-bold font-headline text-primary">Trackify</h1>
+        <SidebarTrigger className="md:hidden" />
+        <div className="hidden items-center gap-2 md:flex">
+         <Target className="h-7 w-7 text-primary" />
+         <h1 className="text-2xl font-bold font-headline text-primary-foreground">Trackify</h1>
+        </div>
       </div>
       <div className="flex items-center gap-4">
-        {user && (
-          <Button onClick={onAddGoal} size="sm">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Goal
-          </Button>
-        )}
+        <Button onClick={onAddGoal} size="sm">
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Goal
+        </Button>
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                <Avatar className="h-9 w-9">
                   <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
                   <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                 </Avatar>

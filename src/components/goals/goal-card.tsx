@@ -20,6 +20,7 @@ import {
 import { MotivationDialog } from './motivation-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '../ui/badge';
 
 interface GoalCardProps {
   goal: Goal;
@@ -54,14 +55,18 @@ export function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
 
   return (
     <>
-      <Card className={cn("flex flex-col transition-all duration-300", goal.isCompleted && "bg-card/50 opacity-70")}>
-        <CardHeader>
+      <Card className={cn(
+        "flex flex-col transition-all duration-300 hover:shadow-lg", 
+        goal.isCompleted && "bg-card/60"
+        )}>
+        <CardHeader className="pb-4">
             <div className="flex justify-between items-start">
-                <CardTitle className="font-headline pr-2">{goal.title}</CardTitle>
+                <CardTitle className="font-headline text-lg pr-2">{goal.title}</CardTitle>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 -mt-2 -mr-2">
                         <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Goal Options</span>
                     </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -93,17 +98,17 @@ export function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-          <CardDescription className={cn("flex items-center text-sm", isOverdue && "text-destructive")}>
-            <Calendar className="mr-2 h-4 w-4" />
-            {isOverdue ? `Overdue since ${format(goal.targetDate, 'PPP')}` : `Target: ${format(goal.targetDate, 'PPP')}`}
+          <CardDescription className={cn("flex items-center text-xs pt-1", isOverdue && "text-destructive font-semibold")}>
+            <Calendar className="mr-1.5 h-3.5 w-3.5" />
+            {isOverdue ? `Overdue` : `Target: ${format(goal.targetDate, 'MMM d, yyyy')}`}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow">
-          {goal.description && <p className="text-muted-foreground text-sm mb-4">{goal.description}</p>}
+        <CardContent className="flex-grow space-y-4">
+          {goal.description && <p className="text-muted-foreground text-sm">{goal.description}</p>}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-sm">
-              <span className="font-medium">Progress</span>
-              <span className="font-semibold text-primary-foreground bg-primary/80 rounded-full px-2 py-0.5">{goal.progress}%</span>
+              <span className="font-medium text-muted-foreground">Progress</span>
+              <Badge variant={goal.progress === 100 ? 'default' : 'secondary'}>{goal.progress}%</Badge>
             </div>
             <Progress value={goal.progress} />
             {!goal.isCompleted && (
@@ -111,7 +116,7 @@ export function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
                 value={[goal.progress]}
                 onValueChange={handleProgressChange}
                 max={100}
-                step={1}
+                step={5}
                 className="pt-2"
               />
             )}
@@ -120,7 +125,7 @@ export function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
         <CardFooter>
           <Button variant={goal.isCompleted ? "outline" : "default"} className="w-full" onClick={handleCompleteToggle}>
             {goal.isCompleted ? <XCircle className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-            {goal.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
+            {goal.isCompleted ? "Mark Incomplete" : "Mark Complete"}
           </Button>
         </CardFooter>
       </Card>

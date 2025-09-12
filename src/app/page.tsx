@@ -103,10 +103,10 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
+    <div className="flex w-full flex-col">
       <Header onAddGoal={() => setIsAddGoalDialogOpen(true)} />
       <main className="flex-1 p-4 sm:p-6 md:p-8">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           {goals.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-[400px]">
               <h3 className="text-2xl font-bold tracking-tight font-headline">You have no goals yet.</h3>
@@ -123,7 +123,7 @@ export default function Home() {
               <section id="active-goals">
                 <h2 className="text-2xl font-bold font-headline mb-4">Active Goals</h2>
                 {activeGoals.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {activeGoals.map(goal => (
                       <GoalCard
                         key={goal.id}
@@ -134,7 +134,7 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center text-muted-foreground p-8 bg-card rounded-lg">
+                  <div className="text-center text-muted-foreground p-8 bg-card rounded-lg border">
                     <p>No active goals. Add a new one to get started!</p>
                   </div>
                 )}
@@ -146,7 +146,7 @@ export default function Home() {
                     <Trophy className="mr-2 h-6 w-6 text-yellow-500" />
                     Completed Goals
                   </h2>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {completedGoals.map(goal => (
                        <GoalCard
                         key={goal.id}

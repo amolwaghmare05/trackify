@@ -2,25 +2,36 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Target } from 'lucide-react';
+import { LayoutDashboard, Target as TargetIcon, Settings } from 'lucide-react';
 
 import {
   SidebarContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { Target } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/', label: 'Goals', icon: Target },
+  { href: '/goals', label: 'Goals', icon: TargetIcon },
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <SidebarContent>
+    <>
+    <SidebarHeader>
+        <div className="flex items-center gap-2">
+            <Target className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold font-headline text-primary-foreground">Trackify</h1>
+        </div>
+    </SidebarHeader>
+    <SidebarContent className="p-2">
       <SidebarMenu>
         {navItems.map((item) => (
           <SidebarMenuItem key={item.label}>
@@ -38,5 +49,19 @@ export function SidebarNav() {
         ))}
       </SidebarMenu>
     </SidebarContent>
+    <SidebarFooter className="p-2">
+        <SidebarSeparator />
+         <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Settings" asChild>
+                    <Link href="#">
+                        <Settings />
+                        <span>Settings</span>
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu>
+    </SidebarFooter>
+    </>
   );
 }
