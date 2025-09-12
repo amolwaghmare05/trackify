@@ -23,6 +23,20 @@ const signInSchema = z.object({
 
 type SignInFormValues = z.infer<typeof signInSchema>;
 
+const getFirebaseAuthErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Invalid credentials. Please check your email and password.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled.';
+    default:
+      return 'An unexpected error occurred. Please try again.';
+  }
+};
+
 export default function SignInPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +56,7 @@ export default function SignInPage() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push('/');
     } catch (error: any) {
-      setError(error.message);
+      setError(getFirebaseAuthErrorMessage(error.code));
     }
   };
 

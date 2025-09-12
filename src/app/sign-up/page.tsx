@@ -24,6 +24,21 @@ const signUpSchema = z.object({
 
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
+const getFirebaseAuthErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/email-already-in-use':
+      return 'This email address is already in use by another account.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/operation-not-allowed':
+      return 'Email/password accounts are not enabled.';
+    case 'auth/weak-password':
+      return 'The password is too weak. Please choose a stronger password.';
+    default:
+      return 'An unexpected error occurred. Please try again.';
+  }
+};
+
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +62,7 @@ export default function SignUpPage() {
       });
       router.push('/');
     } catch (error: any) {
-      setError(error.message);
+      setError(getFirebaseAuthErrorMessage(error.code));
     }
   };
 
@@ -109,7 +124,7 @@ export default function SignUpPage() {
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? 'Creating Account...' : 'Sign Up'}
-              </Button>
+              </button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
