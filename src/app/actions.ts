@@ -1,14 +1,5 @@
 'use server';
 import { generateMotivation, type GenerateMotivationInput, type GenerateMotivationOutput } from '@/ai/flows/ai-powered-motivation';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  updateProfile,
-} from 'firebase/auth';
-import { app } from '@/lib/firebase';
-import { z } from 'zod';
 
 export async function getMotivationAction(input: GenerateMotivationInput): Promise<GenerateMotivationOutput> {
   try {
@@ -21,45 +12,4 @@ export async function getMotivationAction(input: GenerateMotivationInput): Promi
       suggestion: 'Maybe take a short break and come back with a fresh perspective.',
     };
   }
-}
-
-const authSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-
-type AuthInput = z.infer<typeof authSchema>;
-
-const signUpSchema = authSchema.extend({
-    username: z.string().min(3),
-});
-
-type SignUpInput = z.infer<typeof signUpSchema>;
-
-
-export async function signInWithEmail(data: AuthInput): Promise<{ error?: string } | void> {
-  try {
-    const auth = getAuth(app);
-    await signInWithEmailAndPassword(auth, data.email, data.password);
-  } catch (error: any) {
-    return { error: error.message };
-  }
-}
-
-export async function signUpWithEmail(data: SignUpInput): Promise<{ error?: string }> {
-  try {
-    const auth = getAuth(app);
-    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-    await updateProfile(userCredential.user, {
-        displayName: data.username
-    });
-    return {};
-  } catch (error: any) {
-    return { error: error.message };
-  }
-}
-
-export async function signOutUser(): Promise<void> {
-  const auth = getAuth(app);
-  await signOut(auth);
 }

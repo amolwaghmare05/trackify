@@ -1,4 +1,3 @@
-// src/app/sign-in/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { signInWithEmail } from '@/app/actions';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { app } from '@/lib/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,12 +37,12 @@ export default function SignInPage() {
 
   const onSubmit = async (data: SignInFormValues) => {
     setError(null);
-    const result = await signInWithEmail(data);
-    if (result?.error) {
-      setError(result.error);
-    } else {
+    try {
+      const auth = getAuth(app);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push('/');
-      router.refresh(); // Ensure the page re-renders with the new auth state
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 

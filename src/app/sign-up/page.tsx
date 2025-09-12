@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { signUpWithEmail } from '@/app/actions';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { app } from '@/lib/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const signUpSchema = z.object({
-  username: z.string().min(3, { message: 'Username must be at least 3 characters.'}),
+  username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
@@ -38,11 +39,15 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignUpFormValues) => {
     setError(null);
-    const result = await signUpWithEmail(data);
-    if (result.error) {
-      setError(result.error);
-    } else {
+    try {
+      const auth = getAuth(app);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, {
+        displayName: data.username,
+      });
       router.push('/');
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 
