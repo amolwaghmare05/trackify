@@ -1,135 +1,106 @@
 'use client';
 
 import { useState } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { Calendar, CheckCircle2, MoreVertical, Trash2, Edit, Sparkles, XCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Goal } from '@/lib/types';
-
+import type { Goal, DailyTask } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu';
-import { MotivationDialog } from './motivation-dialog';
+import { PlusCircle, MoreVertical, Edit, Trash2, Flame } from 'lucide-react';
+import { AddTaskForm } from './add-task-form';
+import { DailyTaskList } from './daily-task-list';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '../ui/badge';
+import { AddGoalDialog } from './add-goal-dialog';
 
 interface GoalCardProps {
   goal: Goal;
-  onUpdate: (goal: Goal) => void;
-  onDelete: (id: string) => void;
+  tasks: DailyTask[];
+  onUpdateGoal: (goalId: string, data: { title: string; targetDays: number }) => void;
+  onDeleteGoal: (goalId: string) => void;
 }
 
-export function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
-  const { toast } = useToast();
-  const [isMotivationOpen, setIsMotivationOpen] = useState(false);
+export function GoalCard({ goal, tasks, onUpdateGoal, onDeleteGoal }: GoalCardProps) {
+  const [isAddTaskFormVisible, setIsAddTaskFormVisible] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const handleProgressChange = (value: number[]) => {
-    onUpdate({ ...goal, progress: value[0] });
-  };
-
-  const handleCompleteToggle = () => {
-    const isCompleting = !goal.isCompleted;
-    onUpdate({ 
-        ...goal, 
-        isCompleted: isCompleting, 
-        progress: isCompleting ? 100 : goal.progress,
-        completedAt: isCompleting ? new Date() : undefined,
-    });
-    toast({
-        title: isCompleting ? "Goal Completed!" : "Goal Reactivated",
-        description: `"${goal.title}" marked as ${isCompleting ? 'complete' : 'active'}.`,
-    })
-  };
-
-  const timeToTarget = formatDistanceToNow(goal.targetDate, { addSuffix: true });
-  const isOverdue = !goal.isCompleted && new Date() > goal.targetDate;
+  const totalStreak = tasks.reduce((sum, task) => sum + task.streak, 0);
 
   return (
     <>
-      <Card className={cn(
-        "flex flex-col transition-all duration-300 hover:shadow-lg", 
-        goal.isCompleted && "bg-card/60"
-        )}>
-        <CardHeader className="pb-4">
-            <div className="flex justify-between items-start">
-                <CardTitle className="font-headline text-lg pr-2">{goal.title}</CardTitle>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 -mt-2 -mr-2">
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Goal Options</span>
-                    </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setIsMotivationOpen(true)}>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Get Motivation
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Goal
-                          </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your goal.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete(goal.id)} className={cn("bg-destructive text-destructive-foreground hover:bg-destructive/90")}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+      <Card className="flex flex-col">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div className='flex-1 pr-4'>
+                <CardTitle className="font-headline text-lg">{goal.title}</CardTitle>
+                <CardDescription>Target: {goal.targetDays} days</CardDescription>
             </div>
-          <CardDescription className={cn("flex items-center text-xs pt-1", isOverdue && "text-destructive font-semibold")}>
-            <Calendar className="mr-1.5 h-3.5 w-3.5" />
-            {isOverdue ? `Overdue` : `Target: ${format(goal.targetDate, 'MMM d, yyyy')}`}
-          </CardDescription>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                  <Edit className="mr-2 h-4 w-4" /> Edit Goal
+                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Goal
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete the goal and all its associated daily tasks. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => onDeleteGoal(goal.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent className="flex-grow space-y-4">
-          {goal.description && <p className="text-muted-foreground text-sm">{goal.description}</p>}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium text-muted-foreground">Progress</span>
-              <Badge variant={goal.progress === 100 ? 'default' : 'secondary'}>{goal.progress}%</Badge>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium text-muted-foreground">Progress</span>
+              <span className="text-sm font-bold">{Math.round(goal.progress)}%</span>
             </div>
             <Progress value={goal.progress} />
-            {!goal.isCompleted && (
-              <Slider
-                value={[goal.progress]}
-                onValueChange={handleProgressChange}
-                max={100}
-                step={5}
-                className="pt-2"
-              />
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold">Daily Tasks</h4>
+            <DailyTaskList tasks={tasks} goalId={goal.id} targetDays={goal.targetDays} />
+            {isAddTaskFormVisible ? (
+              <AddTaskForm goalId={goal.id} onTaskAdded={() => setIsAddTaskFormVisible(false)} />
+            ) : (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setIsAddTaskFormVisible(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Daily Task
+              </Button>
             )}
           </div>
         </CardContent>
-        <CardFooter>
-          <Button variant={goal.isCompleted ? "outline" : "default"} className="w-full" onClick={handleCompleteToggle}>
-            {goal.isCompleted ? <XCircle className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-            {goal.isCompleted ? "Mark Incomplete" : "Mark Complete"}
-          </Button>
+        <CardFooter className="bg-muted/50 p-4 rounded-b-lg">
+            <div className="flex items-center text-sm font-semibold text-muted-foreground">
+                <Flame className="mr-2 h-5 w-5 text-orange-500"/>
+                Total Days Completed: {totalStreak}
+            </div>
         </CardFooter>
       </Card>
-      <MotivationDialog goal={goal} isOpen={isMotivationOpen} onOpenChange={setIsMotivationOpen} />
+      <AddGoalDialog 
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        goal={goal}
+        onAddGoal={(data) => onUpdateGoal(goal.id, data)}
+      />
     </>
   );
 }

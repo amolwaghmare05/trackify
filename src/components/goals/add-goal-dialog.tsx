@@ -3,12 +3,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { format } from 'date-fns';
-import { Calendar as CalendarIcon, PlusCircle } from 'lucide-react';
+import { Target } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogContent,
@@ -26,22 +23,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import type { Goal } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-
 
 const addGoalSchema = z.object({
   title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
-  description: z.string().optional(),
-  targetDate: z.date({
-    required_error: 'A target date is required.',
-  }),
+  targetDays: z.coerce.number().min(1, { message: 'Target days must be at least 1.' }),
 });
 
 type AddGoalFormValues = z.infer<typeof addGoalSchema>;
@@ -49,43 +35,58 @@ type AddGoalFormValues = z.infer<typeof addGoalSchema>;
 interface AddGoalDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddGoal: (newGoal: Omit<Goal, 'id' | 'isCompleted' | 'progress'>) => void;
+  onAddGoal: (data: AddGoalFormValues) => void;
+  goal?: Goal; // Optional for editing
 }
 
-export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal }: AddGoalDialogProps) {
-  const { toast } = useToast();
+export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoalDialogProps) {
   const form = useForm<AddGoalFormValues>({
     resolver: zodResolver(addGoalSchema),
     defaultValues: {
-      title: '',
-      description: '',
+      title: goal?.title || '',
+      targetDays: goal?.targetDays || 30,
     },
   });
 
+  // useEffect to reset form when goal prop changes (for editing)
+  React.useEffect(() => {
+    if (goal) {
+      form.reset({
+        title: goal.title,
+        targetDays: goal.targetDays,
+      });
+    } else {
+      form.reset({
+        title: '',
+        targetDays: 30,
+      });
+    }
+  }, [goal, form]);
+
+
   const onSubmit = (data: AddGoalFormValues) => {
-    onAddGoal({
-      title: data.title,
-      description: data.description || '',
-      targetDate: data.targetDate,
-    });
-    toast({
-        title: "Goal Created!",
-        description: `Your new goal "${data.title}" has been added.`,
-    })
+    onAddGoal(data);
     onOpenChange(false);
     form.reset();
   };
+  
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      form.reset({ title: '', targetDays: 30 });
+    }
+    onOpenChange(open);
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-headline flex items-center">
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Create a New Goal
+            <Target className="mr-2 h-5 w-5" />
+            {goal ? 'Edit Goal' : 'Create a New Goal'}
           </DialogTitle>
           <DialogDescription>
-            Define a new SMART goal. Make it specific, measurable, achievable, relevant, and time-bound.
+            {goal ? 'Update the details of your long-term goal.' : 'Define a new long-term goal and how many days you want to work on it.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -97,7 +98,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal }: AddGoalDialog
                 <FormItem>
                   <FormLabel>Goal Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Run a marathon" {...field} />
+                    <Input placeholder="e.g., Learn a new programming language" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,62 +106,19 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal }: AddGoalDialog
             />
             <FormField
               control={form.control}
-              name="description"
+              name="targetDays"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Target Completion (in days)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Describe your goal and why it's important to you."
-                      className="resize-none"
-                      {...field}
-                    />
+                    <Input type="number" placeholder="e.g., 90" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="targetDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Target Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-                <Button type="submit">Create Goal</Button>
+                <Button type="submit">{goal ? 'Save Changes' : 'Create Goal'}</Button>
             </DialogFooter>
           </form>
         </Form>
