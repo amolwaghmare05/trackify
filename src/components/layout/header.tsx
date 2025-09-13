@@ -49,7 +49,7 @@ function LiveClock() {
     <div className="hidden md:flex items-center gap-3 text-sm font-medium text-muted-foreground">
       <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
       <Separator orientation="vertical" className="h-4" />
-      <span>{format(currentTime, 'h:mm:ss a')}</span>
+      <span>{format(currentTime, 'h:mm a')}</span>
     </div>
   );
 }
