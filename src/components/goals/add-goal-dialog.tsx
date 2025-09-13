@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -62,13 +63,12 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoal
         targetDays: 30,
       });
     }
-  }, [goal, form]);
+  }, [goal, form, isOpen]);
 
 
   const onSubmit = (data: AddGoalFormValues) => {
     onAddGoal(data);
     onOpenChange(false);
-    form.reset();
   };
   
   const handleOpenChange = (open: boolean) => {
@@ -84,10 +84,10 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoal
         <DialogHeader>
           <DialogTitle className="font-headline flex items-center">
             <Target className="mr-2 h-5 w-5" />
-            {goal ? 'Edit Goal' : 'Create a New Goal'}
+            {goal ? 'Edit Goal' : 'Add New Goal'}
           </DialogTitle>
           <DialogDescription>
-            {goal ? 'Update the details of your long-term goal.' : 'Define a new long-term goal and how many days you want to work on it.'}
+            {goal ? 'Update the details of your long-term goal.' : 'Enter the details for your new goal.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -99,7 +99,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoal
                 <FormItem>
                   <FormLabel>Goal Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Learn a new programming language" {...field} />
+                    <Input placeholder="e.g., Learn to Play Piano" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,7 +110,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoal
               name="targetDays"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Target Completion (in days)</FormLabel>
+                  <FormLabel>Target Days</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="e.g., 90" {...field} />
                   </FormControl>
@@ -119,7 +119,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, goal }: AddGoal
               )}
             />
             <DialogFooter>
-                <Button type="submit">{goal ? 'Save Changes' : 'Create Goal'}</Button>
+                <Button type="submit">{goal ? 'Save Changes' : 'Add Goal'}</Button>
             </DialogFooter>
           </form>
         </Form>

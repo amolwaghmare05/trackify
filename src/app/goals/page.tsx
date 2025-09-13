@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Goal, DailyTask } from '@/lib/types';
-import { PlusCircle, Target } from 'lucide-react';
+import { Target, PlusCircle, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
@@ -111,27 +111,13 @@ export default function GoalsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       <section id="long-term-goals">
-        {goals.length > 0 ? (
-          <MyGoalsList 
-            goals={goals}
-            tasks={tasks}
-            onAddGoal={() => setIsAddGoalDialogOpen(true)}
-            onUpdateGoal={handleUpdateGoal}
-            onDeleteGoal={handleDeleteGoal}
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-            <Target className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-bold tracking-tight font-headline">Set Your First Long-Term Goal</h3>
-            <p className="text-sm text-muted-foreground mt-2 mb-4">
-              What great accomplishment are you aiming for?
-            </p>
-            <Button onClick={() => setIsAddGoalDialogOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Goal
-            </Button>
-          </div>
-        )}
+        <MyGoalsList 
+          goals={goals}
+          tasks={tasks}
+          onAddGoal={() => setIsAddGoalDialogOpen(true)}
+          onUpdateGoal={handleUpdateGoal}
+          onDeleteGoal={handleDeleteGoal}
+        />
       </section>
 
       <Separator />
