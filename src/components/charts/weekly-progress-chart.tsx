@@ -1,12 +1,11 @@
 
 'use client';
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { getWeek, format } from 'date-fns';
 import { CheckCircle } from 'lucide-react';
-import { useMemo } from 'react';
 
 interface WeeklyProgressChartProps {
   data: { day: string; 'Tasks Completed': number }[];
@@ -24,12 +23,6 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
   const weekNumber = getWeek(now, { weekStartsOn: 1 });
   const monthName = format(now, 'MMMM');
 
-  const yAxisMax = useMemo(() => {
-    const maxTasks = Math.max(...data.map(item => item['Tasks Completed']), 0);
-    // Ensure the axis is at least 5, and add a buffer if the max is higher.
-    return Math.max(5, Math.ceil(maxTasks * 1.2));
-  }, [data]);
-
   return (
     <Card>
       <CardHeader>
@@ -45,33 +38,21 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-          <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis 
-              dataKey="day" 
-              stroke="hsl(var(--muted-foreground))" 
-              fontSize={12} 
-              tickLine={false} 
-              axisLine={false} 
-              tickMargin={8}
-            />
+          <BarChart data={data}>
+            <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis
-              stroke="hsl(var(--muted-foreground))"
+              stroke="#888888"
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              allowDecimals={false}
-              domain={[0, yAxisMax]}
+              tickFormatter={(value) => `${value}`}
             />
             <Tooltip
-              cursor={false}
               content={<ChartTooltipContent 
-                hideLabel 
-                formatter={(value) => `${value}`} 
-                className="rounded-md border bg-background/95 p-2 text-sm shadow-lg backdrop-blur-sm"
+                formatter={(value) => `${value} tasks`} 
               />}
             />
-            <Bar dataKey="Tasks Completed" fill="var(--color-tasksCompleted)" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="Tasks Completed" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ChartContainer>
       </CardContent>

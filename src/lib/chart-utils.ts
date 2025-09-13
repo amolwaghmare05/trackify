@@ -39,7 +39,7 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
       return taskDate && isSameDay(taskDate, day);
     });
     return {
-      day: format(day, 'E'),
+      day: format(day, 'EEE'),
       'Tasks Completed': completedTasks.length,
     };
   });
@@ -77,7 +77,7 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
     const tasksInWeek = tasks.filter(task => {
         const taskCreationDate = getTaskDate({ ...task, completedAt: task.createdAt });
         if (!taskCreationDate) return false;
-        const taskWeek = getWeekOfMonth(taskCreatione, { weekStartsOn: 1 });
+        const taskWeek = getWeekOfMonth(taskCreationDate, { weekStartsOn: 1 });
         return taskWeek === weekNumber && isWithinInterval(taskCreationDate, {start: startOfCurrentMonth, end: endOfCurrentMonth});
     });
 
