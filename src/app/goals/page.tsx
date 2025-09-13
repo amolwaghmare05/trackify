@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -49,21 +49,17 @@ export default function GoalsPage() {
     }
   }, [user]);
 
-  // Update goal progress whenever tasks change
-  useEffect(() => {
-    if (tasks.length > 0 && goals.length > 0) {
-      const updatedGoals = goals.map(goal => {
-        const relevantTasks = tasks.filter(task => task.goalId === goal.id && task.completed);
-        const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date(task.completedAt.seconds * 1000).toDateString() : '')).size;
-        const progress = goal.targetDays > 0 ? Math.round((completedDays / goal.targetDays) * 100) : 0;
-        return { ...goal, progress: Math.min(progress, 100), completedDays };
-      });
-      setGoals(updatedGoals);
-    } else if (goals.length > 0) {
-       const updatedGoals = goals.map(goal => ({ ...goal, progress: 0, completedDays: 0 }));
-       setGoals(updatedGoals);
+  const goalsWithProgress = useMemo(() => {
+    if (!goals || goals.length === 0) {
+      return [];
     }
-  }, [tasks, goals]);
+    return goals.map(goal => {
+      const relevantTasks = tasks.filter(task => task.goalId === goal.id && task.completed);
+      const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date(task.completedAt.seconds * 1000).toDateString() : '')).size;
+      const progress = goal.targetDays > 0 ? Math.round((completedDays / goal.targetDays) * 100) : 0;
+      return { ...goal, progress: Math.min(progress, 100), completedDays };
+    });
+  }, [goals, tasks]);
 
 
   const handleAddGoal = async (data: { title: string; targetDays: number }) => {
@@ -130,14 +126,14 @@ export default function GoalsPage() {
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 gap-8">
         <MyGoalsList
-          goals={goals}
+          goals={goalsWithProgress}
           onAddGoal={handleAddGoal}
           onUpdateGoal={handleUpdateGoal}
           onDeleteGoal={handleDeleteGoal}
         />
         <DailyTaskList
           tasks={tasks}
-          goals={goals}
+          goals={goalsWithProgress}
           onAddTask={handleAddTask}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
