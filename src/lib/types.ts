@@ -8,14 +8,3 @@ export interface Goal {
   progress: number; // Percentage
   createdAt: Timestamp;
 }
-
-export interface DailyTask {
-  id: string;
-  userId: string;
-  goalId: string;
-  title: string;
-  completed: boolean;
-  streak: number;
-  lastCompleted: Timestamp | null;
-  createdAt: Timestamp;
-}

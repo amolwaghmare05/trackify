@@ -4,16 +4,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Goal, DailyTask } from '@/lib/types';
-import { Target, PlusCircle, CheckSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
+import type { Goal } from '@/lib/types';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '@/components/ui/separator';
-import { DailyTaskList } from '@/components/goals/daily-task-list';
+import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
 
 export default function GoalsPage() {
   const { user, loading } = useAuth();
@@ -21,8 +17,8 @@ export default function GoalsPage() {
   const { toast } = useToast();
 
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | undefined>(undefined);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,21 +29,13 @@ export default function GoalsPage() {
   useEffect(() => {
     if (user) {
       const goalsQuery = query(collection(db, 'goals'), where('userId', '==', user.uid));
-      const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
-
       const unsubscribeGoals = onSnapshot(goalsQuery, (snapshot) => {
         const goalsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
         setGoals(goalsData);
       });
 
-      const unsubscribeTasks = onSnapshot(tasksQuery, (snapshot) => {
-        const tasksData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailyTask));
-        setTasks(tasksData);
-      });
-
       return () => {
         unsubscribeGoals();
-        unsubscribeTasks();
       };
     }
   }, [user]);
@@ -63,6 +51,7 @@ export default function GoalsPage() {
         createdAt: serverTimestamp(),
       });
       toast({ title: 'Goal added successfully!' });
+      setIsAddGoalDialogOpen(false);
     } catch (error) {
       console.error('Error adding goal: ', error);
       toast({ title: 'Failed to add goal.', variant: 'destructive' });
@@ -73,6 +62,7 @@ export default function GoalsPage() {
     try {
       await updateDoc(doc(db, 'goals', goalId), data);
       toast({ title: 'Goal updated successfully!' });
+      setEditingGoal(undefined);
     } catch (error) {
       console.error('Error updating goal: ', error);
       toast({ title: 'Failed to update goal.', variant: 'destructive' });
@@ -81,24 +71,35 @@ export default function GoalsPage() {
 
   const handleDeleteGoal = async (goalId: string) => {
     try {
-      // First, delete all tasks associated with the goal
-      const tasksQuery = query(collection(db, 'dailyTasks'), where('goalId', '==', goalId));
-      const tasksSnapshot = await getDocs(tasksQuery);
-      const batch = writeBatch(db);
-      tasksSnapshot.forEach(taskDoc => {
-        batch.delete(taskDoc.ref);
-      });
-      await batch.commit();
-
-      // Then, delete the goal itself
       await deleteDoc(doc(db, 'goals', goalId));
-      
-      toast({ title: 'Goal and associated tasks deleted.' });
+      toast({ title: 'Goal deleted.' });
     } catch (error) {
-      console.error('Error deleting goal and tasks: ', error);
+      console.error('Error deleting goal: ', error);
       toast({ title: 'Failed to delete goal.', variant: 'destructive' });
     }
   };
+
+  const openEditDialog = (goal: Goal) => {
+    setEditingGoal(goal);
+  };
+
+  const handleDialogSubmit = (data: { title: string; targetDays: number }) => {
+    if (editingGoal) {
+      handleUpdateGoal(editingGoal.id, data);
+    } else {
+      handleAddGoal(data);
+    }
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setEditingGoal(undefined);
+      setIsAddGoalDialogOpen(false);
+    } else {
+      setIsAddGoalDialogOpen(true);
+    }
+  }
+
 
   if (loading || !user) {
     return (
@@ -113,23 +114,17 @@ export default function GoalsPage() {
       <section id="long-term-goals">
         <MyGoalsList 
           goals={goals}
-          tasks={tasks}
           onAddGoal={() => setIsAddGoalDialogOpen(true)}
-          onUpdateGoal={handleUpdateGoal}
+          onEditGoal={openEditDialog}
           onDeleteGoal={handleDeleteGoal}
         />
       </section>
 
-      <Separator />
-
-      <section id="daily-tasks">
-        <DailyTaskList tasks={tasks} goals={goals} />
-      </section>
-
       <AddGoalDialog
-        isOpen={isAddGoalDialogOpen}
-        onOpenChange={setIsAddGoalDialogOpen}
-        onAddGoal={handleAddGoal}
+        isOpen={isAddGoalDialogOpen || !!editingGoal}
+        onOpenChange={handleOpenChange}
+        onAddGoal={handleDialogSubmit}
+        goal={editingGoal}
       />
     </div>
   );
