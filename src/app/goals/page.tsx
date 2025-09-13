@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -62,7 +63,7 @@ export default function GoalsPage() {
        const updatedGoals = goals.map(goal => ({ ...goal, progress: 0, completedDays: 0 }));
        setGoals(updatedGoals);
     }
-  }, [tasks]);
+  }, [tasks, goals]);
 
 
   const handleAddGoal = async (data: { title: string; targetDays: number }) => {
@@ -127,7 +128,7 @@ export default function GoalsPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         <MyGoalsList
           goals={goals}
           onAddGoal={handleAddGoal}
