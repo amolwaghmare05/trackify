@@ -1,6 +1,8 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { Target, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
@@ -16,6 +18,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+
+function LiveClock() {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
+      <span>{format(currentTime, 'eeee, MMMM do')}</span>
+      <span className="font-mono bg-muted px-2 py-1 rounded-md text-foreground">{format(currentTime, 'h:mm:ss a')}</span>
+    </div>
+  );
+}
+
 
 export function Header() {
   const { user } = useAuth();
@@ -38,7 +62,7 @@ export function Header() {
   return (
     <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
-         {/* This is a placeholder for a logo or title if needed, or can be removed */}
+         <LiveClock />
       </div>
       <div className="flex items-center gap-4 ml-auto">
         {user ? (
