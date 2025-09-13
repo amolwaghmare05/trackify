@@ -106,7 +106,7 @@ export function MyGoalsList({ goals, onAddGoal, onUpdateGoal, onDeleteGoal }: My
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your goal.
+              This action cannot be undone. This will permanently delete your goal and all of its associated daily tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

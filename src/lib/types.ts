@@ -9,3 +9,14 @@ export interface Goal {
     progress: number;
     createdAt: Timestamp;
 }
+
+export interface DailyTask {
+    id: string;
+    userId: string;
+    goalId: string;
+    title: string;
+    completed: boolean;
+    streak: number;
+    completedAt: Timestamp | Date | null;
+    createdAt: Timestamp;
+}
