@@ -36,7 +36,7 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 interface AddTaskDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddTask: (data: TaskFormValues) => Promise<void>;
+  onAddTask: (data: TaskFormValues) => void;
   goals: Goal[];
 }
 
@@ -51,14 +51,9 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
 
   const { formState: { isSubmitting }, handleSubmit, reset } = form;
 
-  const onSubmit = async (data: TaskFormValues) => {
-    try {
-      await onAddTask(data);
-      onOpenChange(false); // Close the dialog on success
-    } catch (error) {
-      console.error("Failed to add task", error);
-      // Optionally, show an error toast to the user
-    }
+  const onSubmit = (data: TaskFormValues) => {
+    onAddTask(data);
+    onOpenChange(false);
   };
   
   const handleOpenChange = (open: boolean) => {

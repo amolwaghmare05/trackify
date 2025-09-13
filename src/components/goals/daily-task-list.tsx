@@ -9,12 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { PlusCircle, CheckCircle, Flame, Trash2 } from 'lucide-react';
 import { AddTaskDialog } from './add-task-dialog';
 import { cn } from '@/lib/utils';
-import { serverTimestamp } from 'firebase/firestore';
 
 interface DailyTaskListProps {
   tasks: DailyTask[];
   goals: Goal[];
-  onAddTask: (data: { title: string; goalId: string }) => Promise<void>;
+  onAddTask: (data: { title: string; goalId: string }) => void;
   onUpdateTask: (taskId: string, data: Partial<DailyTask>) => void;
   onDeleteTask: (taskId: string) => void;
 }
@@ -32,12 +31,8 @@ export function DailyTaskList({ tasks, goals, onAddTask, onUpdateTask, onDeleteT
     let newStreak = task.streak;
 
     if (isCompleted) {
-        // Basic streak logic: increment if completed today.
-        // A more robust implementation would check the last completed date.
         newStreak = (task.streak || 0) + 1;
     } else {
-        // If unchecking, you might want to reset or decrement streak
-        // For simplicity, we'll just decrement, but not below 0
         newStreak = Math.max(0, (task.streak || 0) - 1);
     }
 
