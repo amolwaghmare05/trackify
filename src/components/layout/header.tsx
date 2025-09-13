@@ -21,12 +21,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 
-function StaticClock() {
+function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    // Set the time on the client to avoid hydration mismatch
+    // Set initial time on the client
     setCurrentTime(new Date());
+
+    // Update the time every second
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (!currentTime) {
@@ -41,7 +49,7 @@ function StaticClock() {
     <div className="hidden md:flex items-center gap-3 text-sm font-medium text-muted-foreground">
       <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
       <Separator orientation="vertical" className="h-4" />
-      <span>{format(currentTime, 'h:mm a')}</span>
+      <span>{format(currentTime, 'h:mm:ss a')}</span>
     </div>
   );
 }
@@ -68,7 +76,7 @@ export function Header() {
   return (
     <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
-         <StaticClock />
+         <LiveClock />
       </div>
       <div className="flex items-center gap-4 ml-auto">
         {user ? (
