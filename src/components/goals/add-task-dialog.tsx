@@ -45,6 +45,7 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: '',
+      goalId: undefined,
     },
   });
 
@@ -53,12 +54,10 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
   const onSubmit = async (data: TaskFormValues) => {
     try {
       await onAddTask(data);
+      onOpenChange(false); // Close the dialog on success
     } catch (error) {
       console.error("Failed to add task", error);
       // Optionally, show an error toast to the user
-    } finally {
-      reset();
-      onOpenChange(false);
     }
   };
   
