@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import type { Goal } from '@/lib/types';
 
 const addGoalSchema = z.object({
-  title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
+  title: z.string().min(1, { message: 'Title is required.' }),
   targetDays: z.coerce.number().min(1, { message: 'Target days must be at least 1.' }),
 });
 
