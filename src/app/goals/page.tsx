@@ -13,6 +13,7 @@ import { GoalCard } from '@/components/goals/goal-card';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
+import { AddTaskSection } from '@/components/goals/add-task-section';
 
 export default function GoalsPage() {
   const { user, loading } = useAuth();
@@ -149,32 +150,44 @@ export default function GoalsPage() {
       <section id="daily-tasks">
         <div className="mb-4">
             <h2 className="text-2xl font-bold font-headline">Daily Tasks</h2>
-            <p className="text-muted-foreground text-sm">A consolidated list of all your daily tasks.</p>
+            <p className="text-muted-foreground text-sm">Add and track the daily actions that contribute to your long-term goals.</p>
         </div>
-        {goals.length > 0 && tasks.length > 0 ? (
-            <div className="space-y-6">
-                {goals.map(goal => {
-                    const goalTasks = tasks.filter(t => t.goalId === goal.id);
-                    if (goalTasks.length === 0) return null;
-                    return (
-                        <div key={goal.id} className="rounded-lg border bg-card p-4">
-                            <h3 className="font-semibold mb-2">{goal.title}</h3>
-                            <DailyTaskList tasks={goalTasks} goalId={goal.id} targetDays={goal.targetDays} />
-                        </div>
-                    )
-                })}
-            </div>
+        {goals.length > 0 ? (
+            <>
+                <AddTaskSection goals={goals} />
+                {tasks.length > 0 ? (
+                    <div className="space-y-6 mt-6">
+                        {goals.map(goal => {
+                            const goalTasks = tasks.filter(t => t.goalId === goal.id);
+                            if (goalTasks.length === 0) return null;
+                            return (
+                                <div key={goal.id} className="rounded-lg border bg-card p-4">
+                                    <h3 className="font-semibold mb-2">{goal.title}</h3>
+                                    <DailyTaskList tasks={goalTasks} goalId={goal.id} targetDays={goal.targetDays} />
+                                </div>
+                            )
+                        })}
+                    </div>
+                ) : (
+                    <div className="mt-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
+                        <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
+                        <p className="text-sm text-muted-foreground mt-2">
+                            Add a task above to start tracking your daily progress.
+                        </p>
+                    </div>
+                )}
+            </>
         ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-                <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
+                <Target className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-bold tracking-tight font-headline">Create a Goal First</h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                    Add tasks to your goals to start tracking your daily progress.
+                    You need to have at least one goal before you can add daily tasks.
                 </p>
             </div>
         )}
       </section>
-
 
       <AddGoalDialog
         isOpen={isAddGoalDialogOpen}
