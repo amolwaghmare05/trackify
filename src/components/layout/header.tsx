@@ -18,11 +18,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Skeleton } from '../ui/skeleton';
 
 function LiveClock() {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // Set the initial time on the client
+    setCurrentTime(new Date());
+
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -31,6 +35,15 @@ function LiveClock() {
       clearInterval(timer);
     };
   }, []);
+
+  if (!currentTime) {
+    return (
+        <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-6 w-24" />
+        </div>
+    );
+  }
 
   return (
     <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
