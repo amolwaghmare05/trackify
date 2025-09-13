@@ -35,8 +35,11 @@ export default function Home() {
         <Target className="h-16 w-16 text-primary mb-4" />
         <h3 className="text-2xl font-bold tracking-tight font-headline">Welcome to Trackify, {user.displayName}!</h3>
         <p className="text-sm text-muted-foreground mt-2 mb-4">
-          Your personal dashboard is ready.
+          Your personal dashboard is ready. Start by adding a goal.
         </p>
+        <Button asChild>
+          <Link href="/goals">Go to Goals</Link>
+        </Button>
       </div>
     </div>
   );
