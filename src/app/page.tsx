@@ -1,15 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
+import type { DailyTask } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
+import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
+import { processTasksForCharts } from '@/lib/chart-utils';
 
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [tasks, setTasks] = useState<DailyTask[]>([]);
+  const [chartData, setChartData] = useState<{
+    weeklyProgress: any[];
+    consistencyTrend: { daily: any[]; weekly: any[] };
+  } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -17,7 +25,26 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  useEffect(() => {
+    if (user) {
+      const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
+      const unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
+        const userTasks: DailyTask[] = [];
+        querySnapshot.forEach((doc) => {
+          userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
+        });
+        setTasks(userTasks);
+        setChartData(processTasksForCharts(userTasks));
+      });
+
+      return () => unsubscribeTasks();
+    } else {
+      setTasks([]);
+      setChartData(null);
+    }
+  }, [user]);
+
+  if (loading || !user) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
         <p>Loading...</p>
@@ -25,21 +52,19 @@ export default function Home() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
-    <div className="mx-auto flex h-full max-w-7xl items-center justify-center">
-      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-        <Target className="h-16 w-16 text-primary mb-4" />
-        <h3 className="text-2xl font-bold tracking-tight font-headline">Welcome to Trackify, {user.displayName}!</h3>
-        <p className="text-sm text-muted-foreground mt-2 mb-4">
-          Your personal dashboard is ready. Start by adding a goal.
-        </p>
-        <Button asChild>
-          <Link href="/goals">Go to Goals</Link>
-        </Button>
+    <div className="container mx-auto py-8">
+       <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold font-headline tracking-tight">Welcome back, {user.displayName}!</h1>
+        <p className="text-muted-foreground">Here's a look at your progress.</p>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {chartData && (
+          <>
+            <WeeklyProgressChart data={chartData.weeklyProgress} />
+            <ConsistencyTrendChart data={chartData.consistencyTrend} />
+          </>
+        )}
       </div>
     </div>
   );

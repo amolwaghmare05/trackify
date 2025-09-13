@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -8,12 +7,20 @@ import { useAuth } from '@/context/auth-context';
 import type { Goal, DailyTask } from '@/lib/types';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
+import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
+import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
+import { processTasksForCharts } from '@/lib/chart-utils';
 
 export default function GoalsPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<{
+    weeklyProgress: any[];
+    consistencyTrend: { daily: any[]; weekly: any[] };
+  } | null>(null);
+
 
   useEffect(() => {
     if (user) {
@@ -36,6 +43,7 @@ export default function GoalsPage() {
           userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
         });
         setTasks(userTasks);
+        setChartData(processTasksForCharts(userTasks));
       });
 
       return () => {
@@ -46,6 +54,7 @@ export default function GoalsPage() {
       setGoals([]);
       setTasks([]);
       setLoading(false);
+      setChartData(null);
     }
   }, [user]);
 
@@ -122,22 +131,26 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="grid grid-cols-1 gap-8">
-        <MyGoalsList
-          goals={goalsWithProgress}
-          onAddGoal={handleAddGoal}
-          onUpdateGoal={handleUpdateGoal}
-          onDeleteGoal={handleDeleteGoal}
-        />
-        <DailyTaskList
-          tasks={tasks}
-          goals={goalsWithProgress}
-          onAddTask={handleAddTask}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={handleDeleteTask}
-        />
-      </div>
+    <div className="container mx-auto py-8 space-y-8">
+       {chartData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <WeeklyProgressChart data={chartData.weeklyProgress} />
+            <ConsistencyTrendChart data={chartData.consistencyTrend} />
+        </div>
+        )}
+      <MyGoalsList
+        goals={goalsWithProgress}
+        onAddGoal={handleAddGoal}
+        onUpdateGoal={handleUpdateGoal}
+        onDeleteGoal={handleDeleteGoal}
+      />
+      <DailyTaskList
+        tasks={tasks}
+        goals={goalsWithProgress}
+        onAddTask={handleAddTask}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={handleDeleteTask}
+      />
     </div>
   );
 }
