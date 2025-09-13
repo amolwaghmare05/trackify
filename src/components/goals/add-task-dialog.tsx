@@ -31,7 +31,7 @@ import type { Goal } from '@/lib/types';
 import { CheckSquare } from 'lucide-react';
 
 const addTaskSchema = z.object({
-  title: z.string().min(3, { message: 'Task title must be at least 3 characters.' }),
+  title: z.string().min(1, { message: "Task title is required." }),
   goalId: z.string({ required_error: "Please select a goal." }),
 });
 
