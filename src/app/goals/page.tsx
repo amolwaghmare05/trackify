@@ -132,12 +132,6 @@ export default function GoalsPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-       {chartData && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <WeeklyProgressChart data={chartData.weeklyProgress} />
-            <ConsistencyTrendChart data={chartData.consistencyTrend} />
-        </div>
-        )}
       <MyGoalsList
         goals={goalsWithProgress}
         onAddGoal={handleAddGoal}
@@ -151,6 +145,12 @@ export default function GoalsPage() {
         onUpdateTask={handleUpdateTask}
         onDeleteTask={handleDeleteTask}
       />
+       {chartData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <WeeklyProgressChart data={chartData.weeklyProgress} />
+            <ConsistencyTrendChart data={chartData.consistencyTrend} />
+        </div>
+        )}
     </div>
   );
 }
