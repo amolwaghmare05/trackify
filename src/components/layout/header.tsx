@@ -1,7 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
-import { Target, PlusCircle, User, LogOut } from 'lucide-react';
+import { Target, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
 import { auth } from '@/lib/firebase';
@@ -16,13 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
-import type { Goal } from '@/lib/types';
 
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
-  const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -38,22 +35,12 @@ export function Header() {
     return name.charAt(0).toUpperCase();
   };
 
-  const handleAddGoal = (newGoal: Omit<Goal, 'id' | 'isCompleted' | 'progress'>) => {
-    // This is a placeholder. In a real application, you would handle this with a global state manager or by passing a function from a parent component.
-    console.log("New Goal added in Header:", newGoal);
-  };
-
   return (
     <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
-         <Target className="h-7 w-7 text-primary" />
-         <h1 className="text-2xl font-bold font-headline text-primary-foreground">Trackify</h1>
+         {/* This is a placeholder for a logo or title if needed, or can be removed */}
       </div>
-      <div className="flex items-center gap-4">
-        <Button onClick={() => setIsAddGoalDialogOpen(true)} size="sm">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Goal
-        </Button>
+      <div className="flex items-center gap-4 ml-auto">
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -87,11 +74,6 @@ export function Header() {
           </Button>
         )}
       </div>
-      <AddGoalDialog 
-        isOpen={isAddGoalDialogOpen} 
-        onOpenChange={setIsAddGoalDialogOpen}
-        onAddGoal={handleAddGoal} 
-      />
     </header>
   );
 }

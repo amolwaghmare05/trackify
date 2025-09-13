@@ -117,7 +117,13 @@ export default function Home() {
       ) : (
         <>
           <section id="active-goals">
-            <h2 className="text-2xl font-bold font-headline mb-4">Active Goals</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold font-headline">Active Goals</h2>
+              <Button onClick={() => setIsAddGoalDialogOpen(true)} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Goal
+              </Button>
+            </div>
             {activeGoals.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {activeGoals.map(goal => (
