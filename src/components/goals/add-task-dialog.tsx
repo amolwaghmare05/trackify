@@ -70,7 +70,7 @@ export function AddTaskDialog({ isOpen, onOpenChange, goals }: AddTaskDialogProp
         createdAt: serverTimestamp(),
       });
       toast({ title: 'Daily task added!' });
-      onOpenChange(false); // This will now correctly close the dialog
+      onOpenChange(false);
     } catch (error) {
       console.error("Error adding task: ", error);
       toast({ title: 'Failed to add task.', variant: 'destructive' });
