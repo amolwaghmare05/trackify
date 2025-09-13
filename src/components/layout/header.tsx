@@ -39,14 +39,14 @@ function LiveClock() {
 
   if (!currentTime) {
     return (
-        <div class="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Skeleton className="h-4 w-48" />
         </div>
     );
   }
 
   return (
-    <div class="hidden md:flex items-center gap-3 text-sm font-medium text-muted-foreground">
+    <div className="hidden md:flex items-center gap-3 text-sm font-medium text-muted-foreground">
       <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
       <Separator orientation="vertical" className="h-4" />
       <span>{format(currentTime, 'h:mm a')}</span>
@@ -74,11 +74,11 @@ export function Header() {
   };
 
   return (
-    <header class="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
-      <div class="flex items-center gap-2">
+    <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
+      <div className="flex items-center gap-2">
          <LiveClock />
       </div>
-      <div class="flex items-center gap-4 ml-auto">
+      <div className="flex items-center gap-4 ml-auto">
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -91,9 +91,9 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
-                <div class="flex flex-col space-y-1">
-                  <p class="text-sm font-medium leading-none">{user.displayName}</p>
-                  <p class="text-xs leading-none text-muted-foreground">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
                   </p>
                 </div>
