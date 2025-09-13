@@ -1,14 +1,22 @@
+
 'use client';
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { getWeek, format } from 'date-fns';
 import { CheckCircle } from 'lucide-react';
 
 interface WeeklyProgressChartProps {
   data: { day: string; 'Tasks Completed': number }[];
 }
+
+const chartConfig = {
+  tasksCompleted: {
+    label: 'Tasks Completed',
+    color: 'hsl(var(--primary))',
+  },
+} satisfies ChartConfig;
 
 export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
   const now = new Date();
@@ -29,7 +37,7 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
           <BarChart data={data}>
             <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis
@@ -41,11 +49,11 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))', radius: 'var(--radius)' }}
-              content={<ChartTooltipContent />}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="Tasks Completed" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Tasks Completed" fill="var(--color-tasksCompleted)" radius={[4, 4, 0, 0]} />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

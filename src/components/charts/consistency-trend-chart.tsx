@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState } from 'react';
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
@@ -14,6 +15,13 @@ interface ConsistencyTrendChartProps {
     weekly: { week: string; consistency: number }[];
   };
 }
+
+const chartConfig = {
+  consistency: {
+    label: 'Consistency',
+    color: 'hsl(var(--primary))',
+  },
+} satisfies ChartConfig;
 
 export function ConsistencyTrendChart({ data }: ConsistencyTrendChartProps) {
   const [view, setView] = useState<'weekly' | 'daily'>('weekly');
@@ -40,9 +48,12 @@ export function ConsistencyTrendChart({ data }: ConsistencyTrendChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {view === 'weekly' && (
-           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.weekly} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+          {view === 'weekly' && (
+            <LineChart
+              data={data.weekly}
+              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            >
               <XAxis dataKey="week" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#888888"
@@ -54,22 +65,23 @@ export function ConsistencyTrendChart({ data }: ConsistencyTrendChartProps) {
               />
               <Tooltip
                 cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, strokeDasharray: '3 3' }}
-                content={<ChartTooltipContent formatter={(value) => `${value}%`} />}
+                content={<ChartTooltipContent formatter={(value) => `${value}%`} hideIndicator />}
               />
               <Line
                 type="monotone"
                 dataKey="consistency"
-                stroke="hsl(var(--primary))"
+                stroke="var(--color-consistency)"
                 strokeWidth={2}
-                dot={{ r: 6, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
-                activeDot={{ r: 8, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
+                dot={{ r: 6, fill: 'var(--color-consistency)', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
+                activeDot={{ r: 8, fill: 'var(--color-consistency)', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
               />
             </LineChart>
-          </ResponsiveContainer>
-        )}
-        {view === 'daily' && (
-           <ResponsiveContainer width="100%" height={300}>
-             <LineChart data={data.daily} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          )}
+          {view === 'daily' && (
+             <LineChart
+                data={data.daily}
+                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+              >
                 <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis
                     stroke="#888888"
@@ -81,19 +93,19 @@ export function ConsistencyTrendChart({ data }: ConsistencyTrendChartProps) {
                 />
                 <Tooltip
                     cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, strokeDasharray: '3 3' }}
-                    content={<ChartTooltipContent formatter={(value) => `${value}%`} />}
+                    content={<ChartTooltipContent formatter={(value) => `${value}%`} hideIndicator />}
                 />
                 <ReferenceLine x={todayDate} stroke="hsl(var(--border))" strokeDasharray="3 3" />
                 <Line
                     type="monotone"
                     dataKey="consistency"
-                    stroke="hsl(var(--primary))"
+                    stroke="var(--color-consistency)"
                     strokeWidth={2}
                     dot={false}
                 />
             </LineChart>
-          </ResponsiveContainer>
-        )}
+          )}
+        </ChartContainer>
       </CardContent>
     </Card>
   );
