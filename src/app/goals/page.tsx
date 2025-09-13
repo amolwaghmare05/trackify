@@ -7,14 +7,13 @@ import { useRouter } from 'next/navigation';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Goal, DailyTask } from '@/lib/types';
-import { PlusCircle, Target, CheckSquare } from 'lucide-react';
+import { PlusCircle, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
-import { AddTaskSection } from '@/components/goals/add-task-section';
 
 export default function GoalsPage() {
   const { user, loading } = useAuth();
@@ -138,17 +137,7 @@ export default function GoalsPage() {
       <Separator />
 
       <section id="daily-tasks">
-        {goals.length > 0 ? (
-            <DailyTaskList tasks={tasks} goals={goals} />
-        ) : (
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-                <Target className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold tracking-tight font-headline">Create a Goal First</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                    You need to have at least one goal before you can add daily tasks.
-                </p>
-            </div>
-        )}
+        <DailyTaskList tasks={tasks} goals={goals} />
       </section>
 
       <AddGoalDialog

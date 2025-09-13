@@ -12,7 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { isSameDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { AddTaskSection } from './add-task-section';
+import { AddTaskDialog } from './add-task-dialog';
+import { cn } from '@/lib/utils';
 
 interface DailyTaskListProps {
   tasks: DailyTask[];
@@ -21,6 +22,7 @@ interface DailyTaskListProps {
 
 export function DailyTaskList({ tasks, goals }: DailyTaskListProps) {
   const { toast } = useToast();
+  const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = React.useState(false);
   const goalsMap = React.useMemo(() => new Map(goals.map(g => [g.id, g])), [goals]);
 
   const handleTaskCheck = async (task: DailyTask) => {
@@ -92,57 +94,74 @@ export function DailyTaskList({ tasks, goals }: DailyTaskListProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
             <div className='flex items-center gap-2'>
                 <CheckSquare className="h-6 w-6" />
                 <CardTitle className="font-headline text-2xl">Daily Tasks</CardTitle>
             </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <AddTaskSection goals={goals} />
-
-        {tasks.length > 0 ? (
-          <ul className="space-y-2">
-            {tasks.map(task => (
-              <li key={task.id} className="group flex items-center justify-between p-2 rounded-md bg-background hover:bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <Checkbox
-                    id={`task-${task.id}`}
-                    checked={task.completed}
-                    onCheckedChange={() => handleTaskCheck(task)}
-                    className="h-5 w-5"
-                  />
-                  <div>
-                    <label htmlFor={`task-${task.id}`} className="text-sm font-medium cursor-pointer">{task.title}</label>
-                    <p className="text-xs text-muted-foreground">{goalsMap.get(task.goalId)?.title || 'Unlinked'}</p>
+            <Button onClick={() => setIsAddTaskDialogOpen(true)} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Task
+            </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {tasks.length > 0 ? (
+            <ul className="space-y-2">
+              {tasks.map(task => (
+                <li key={task.id} className="group flex items-center justify-between p-2 rounded-md bg-background hover:bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id={`task-${task.id}`}
+                      checked={task.completed}
+                      onCheckedChange={() => handleTaskCheck(task)}
+                      className="h-5 w-5"
+                    />
+                    <div>
+                      <label 
+                        htmlFor={`task-${task.id}`} 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          task.completed && "line-through text-muted-foreground"
+                        )}
+                      >
+                        {task.title}
+                      </label>
+                      <p className="text-xs text-muted-foreground">{goalsMap.get(task.goalId)?.title || 'Unlinked'}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className='flex items-center text-sm text-orange-500 font-semibold'>
-                      <Flame className="h-4 w-4 mr-1" />
-                      {task.streak}
+                  <div className="flex items-center gap-4">
+                    {task.streak > 0 && (
+                      <div className='flex items-center text-sm text-orange-500 font-semibold'>
+                          <Flame className="h-4 w-4 mr-1" />
+                          {task.streak}
+                      </div>
+                    )}
+                    {task.completed && <Badge variant="outline">Done</Badge>}
+                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeleteTask(task.id)}>
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                   </div>
-                  {task.completed && <Badge variant="secondary">Done</Badge>}
-                  <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeleteTask(task.id)}>
-                    <Trash2 className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-            <div className="mt-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-                <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                    Add a task above to start tracking your daily progress.
-                </p>
-            </div>
-        )}
-      </CardContent>
-    </Card>
+                </li>
+              ))}
+            </ul>
+          ) : (
+              <div className="mt-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
+                  <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-bold tracking-tight font-headline">No tasks yet.</h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                      Add a goal first, then add tasks.
+                  </p>
+              </div>
+          )}
+        </CardContent>
+      </Card>
+      <AddTaskDialog
+        isOpen={isAddTaskDialogOpen}
+        onOpenChange={setIsAddTaskDialogOpen}
+        goals={goals}
+      />
+    </>
   );
 }

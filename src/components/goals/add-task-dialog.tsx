@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +10,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -17,9 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Goal } from '@/lib/types';
-import { Card, CardContent } from '../ui/card';
+import { CheckSquare } from 'lucide-react';
 
 const addTaskSchema = z.object({
   title: z.string().min(3, { message: 'Task title must be at least 3 characters.' }),
@@ -28,11 +37,13 @@ const addTaskSchema = z.object({
 
 type AddTaskFormValues = z.infer<typeof addTaskSchema>;
 
-interface AddTaskSectionProps {
+interface AddTaskDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
   goals: Goal[];
 }
 
-export function AddTaskSection({ goals }: AddTaskSectionProps) {
+export function AddTaskDialog({ isOpen, onOpenChange, goals }: AddTaskDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const form = useForm<AddTaskFormValues>({
@@ -54,25 +65,42 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
       });
       toast({ title: 'Daily task added!' });
       form.reset();
-      form.setValue('goalId', ''); // Reset select
+      onOpenChange(false);
     } catch (error) {
       console.error("Error adding task: ", error);
       toast({ title: 'Failed to add task.', variant: 'destructive' });
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      form.reset();
+    }
+    onOpenChange(open);
+  }
+
   return (
-    <Card className="bg-muted/50 border-dashed">
-      <CardContent className="p-4">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="font-headline flex items-center">
+            <CheckSquare className="mr-2 h-5 w-5" />
+            Add New Daily Task
+          </DialogTitle>
+          <DialogDescription>
+            Enter the details for your new goal-related task.
+          </DialogDescription>
+        </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="sm:col-span-2">
+                <FormItem>
+                  <FormLabel>Task Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Add a new task..." {...field} />
+                    <Input placeholder="e.g., Practice guitar scales for 15 minutes" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,27 +110,32 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
               control={form.control}
               name="goalId"
               render={({ field }) => (
-                <FormItem className="sm:col-span-2">
+                <FormItem>
+                  <FormLabel>Associated Goal</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Link to a goal" />
-                        </SelectTrigger>
+                          <SelectTrigger>
+                              <SelectValue placeholder="Link to a goal" />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        {goals.map(goal => (
-                            <SelectItem key={goal.id} value={goal.id}>{goal.title}</SelectItem>
-                        ))}
+                          {goals.map(goal => (
+                              <SelectItem key={goal.id} value={goal.id}>{goal.title}</SelectItem>
+                          ))}
                         </SelectContent>
                     </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full sm:col-span-1">Add Task</Button>
+            <DialogFooter>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Adding...' : 'Add Task'}
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }
