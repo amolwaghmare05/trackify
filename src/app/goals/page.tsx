@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,7 +10,7 @@ import type { Goal, DailyTask } from '@/lib/types';
 import { PlusCircle, Target, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
-import { GoalCard } from '@/components/goals/goal-card';
+import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
@@ -111,25 +112,14 @@ export default function GoalsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       <section id="long-term-goals">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold font-headline">My Goals</h2>
-          <Button onClick={() => setIsAddGoalDialogOpen(true)} size="sm">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Goal
-          </Button>
-        </div>
         {goals.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-            {goals.map(goal => (
-              <GoalCard 
-                key={goal.id} 
-                goal={goal} 
-                tasks={tasks.filter(t => t.goalId === goal.id)}
-                onUpdateGoal={handleUpdateGoal}
-                onDeleteGoal={handleDeleteGoal}
-              />
-            ))}
-          </div>
+          <MyGoalsList 
+            goals={goals}
+            tasks={tasks}
+            onAddGoal={() => setIsAddGoalDialogOpen(true)}
+            onUpdateGoal={handleUpdateGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
             <Target className="h-12 w-12 text-muted-foreground mb-4" />
