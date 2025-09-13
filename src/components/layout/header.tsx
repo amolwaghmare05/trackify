@@ -38,7 +38,7 @@ function StaticClock() {
 
   return (
     <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-      <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
+      <span>{format(currentTime, 'eeee, MMMM do, yyyy h:mm a')}</span>
     </div>
   );
 }
