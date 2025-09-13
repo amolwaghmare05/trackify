@@ -20,35 +20,25 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 
-function LiveClock() {
+function StaticClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    // Set the initial time on the client
+    // Set the time on the client to avoid hydration mismatch
     setCurrentTime(new Date());
-
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => {
-      clearInterval(timer);
-    };
   }, []);
 
   if (!currentTime) {
     return (
         <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-4 w-48" />
         </div>
     );
   }
 
   return (
     <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-      <span>{format(currentTime, 'eeee, MMMM do')}</span>
-      <span className="font-mono bg-muted px-2 py-1 rounded-md text-foreground">{format(currentTime, 'h:mm:ss a')}</span>
+      <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
     </div>
   );
 }
@@ -75,7 +65,7 @@ export function Header() {
   return (
     <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
-         <LiveClock />
+         <StaticClock />
       </div>
       <div className="flex items-center gap-4 ml-auto">
         {user ? (
