@@ -138,36 +138,8 @@ export default function GoalsPage() {
       <Separator />
 
       <section id="daily-tasks">
-        <div className="mb-4">
-            <h2 className="text-2xl font-bold font-headline">Daily Tasks</h2>
-            <p className="text-muted-foreground text-sm">Add and track the daily actions that contribute to your long-term goals.</p>
-        </div>
         {goals.length > 0 ? (
-            <>
-                <AddTaskSection goals={goals} />
-                {tasks.length > 0 ? (
-                    <div className="space-y-6 mt-6">
-                        {goals.map(goal => {
-                            const goalTasks = tasks.filter(t => t.goalId === goal.id);
-                            if (goalTasks.length === 0) return null;
-                            return (
-                                <div key={goal.id} className="rounded-lg border bg-card p-4">
-                                    <h3 className="font-semibold mb-2">{goal.title}</h3>
-                                    <DailyTaskList tasks={goalTasks} goalId={goal.id} targetDays={goal.targetDays} />
-                                </div>
-                            )
-                        })}
-                    </div>
-                ) : (
-                    <div className="mt-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
-                        <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
-                        <p className="text-sm text-muted-foreground mt-2">
-                            Add a task above to start tracking your daily progress.
-                        </p>
-                    </div>
-                )}
-            </>
+            <DailyTaskList tasks={tasks} goals={goals} />
         ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
                 <Target className="h-12 w-12 text-muted-foreground mb-4" />

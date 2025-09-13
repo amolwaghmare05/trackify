@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -8,7 +9,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -53,6 +54,7 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
       });
       toast({ title: 'Daily task added!' });
       form.reset();
+      form.setValue('goalId', ''); // Reset select
     } catch (error) {
       console.error("Error adding task: ", error);
       toast({ title: 'Failed to add task.', variant: 'destructive' });
@@ -60,18 +62,17 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-muted/50 border-dashed">
       <CardContent className="p-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>New Task Title</FormLabel>
+                <FormItem className="sm:col-span-2">
                   <FormControl>
-                    <Input placeholder="e.g., Code for 30 minutes" {...field} />
+                    <Input placeholder="Add a new task..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,12 +82,11 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
               control={form.control}
               name="goalId"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Link to Goal</FormLabel>
+                <FormItem className="sm:col-span-2">
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a goal" />
+                            <SelectValue placeholder="Link to a goal" />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -99,7 +99,7 @@ export function AddTaskSection({ goals }: AddTaskSectionProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full md:col-span-3">Add New Daily Task</Button>
+            <Button type="submit" className="w-full sm:col-span-1">Add Task</Button>
           </form>
         </Form>
       </CardContent>

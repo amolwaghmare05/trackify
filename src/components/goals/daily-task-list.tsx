@@ -1,26 +1,34 @@
+
 'use client';
 
-import { collection, doc, updateDoc, increment, serverTimestamp, writeBatch, getDocs, query, where, Timestamp, deleteDoc } from 'firebase/firestore';
+import React from 'react';
+import { collection, doc, updateDoc, getDocs, query, where, Timestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { DailyTask } from '@/lib/types';
+import type { DailyTask, Goal } from '@/lib/types';
 import { Checkbox } from '../ui/checkbox';
 import { Button } from '../ui/button';
-import { Trash2, Flame } from 'lucide-react';
+import { Trash2, Flame, PlusCircle, CheckSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isSameDay } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { AddTaskSection } from './add-task-section';
 
 interface DailyTaskListProps {
   tasks: DailyTask[];
-  goalId: string;
-  targetDays: number;
+  goals: Goal[];
 }
 
-export function DailyTaskList({ tasks, goalId, targetDays }: DailyTaskListProps) {
+export function DailyTaskList({ tasks, goals }: DailyTaskListProps) {
   const { toast } = useToast();
+  const goalsMap = React.useMemo(() => new Map(goals.map(g => [g.id, g])), [goals]);
 
   const handleTaskCheck = async (task: DailyTask) => {
     const taskRef = doc(db, 'dailyTasks', task.id);
-    const goalRef = doc(db, 'goals', goalId);
+    const goalRef = doc(db, 'goals', task.goalId);
+    const goal = goalsMap.get(task.goalId);
+    if (!goal) return;
+
     const newCompletedState = !task.completed;
 
     try {
@@ -28,21 +36,16 @@ export function DailyTaskList({ tasks, goalId, targetDays }: DailyTaskListProps)
         let newStreak = task.streak;
         let newLastCompleted = task.lastCompleted;
 
-        // Logic for streak and progress
-        if (newCompletedState) { // If checking the box
+        if (newCompletedState) { 
             const lastCompletedDate = task.lastCompleted?.toDate();
-            // Only increment streak if it wasn't already completed today
             if (!lastCompletedDate || !isSameDay(lastCompletedDate, today)) {
                 newStreak = task.streak + 1;
                 newLastCompleted = Timestamp.fromDate(today);
             }
-        } else { // If unchecking the box
+        } else {
             const lastCompletedDate = task.lastCompleted?.toDate();
-            // Only decrement streak if it was completed today
             if (lastCompletedDate && isSameDay(lastCompletedDate, today)) {
-                newStreak = Math.max(0, task.streak - 1); // Ensure streak doesn't go below 0
-                // This logic is simple; a more complex app might need to find the previous completion date.
-                // For now, we set to null, meaning they'd have to complete it again tomorrow to continue the streak.
+                newStreak = Math.max(0, task.streak - 1); 
                 newLastCompleted = null;
             }
         }
@@ -54,20 +57,19 @@ export function DailyTaskList({ tasks, goalId, targetDays }: DailyTaskListProps)
         });
 
         // Recalculate goal progress
-        const tasksQuery = query(collection(db, 'dailyTasks'), where('goalId', '==', goalId));
+        const tasksQuery = query(collection(db, 'dailyTasks'), where('goalId', '==', task.goalId));
         const tasksSnapshot = await getDocs(tasksQuery);
         const allGoalTasks = tasksSnapshot.docs.map(d => d.data() as DailyTask);
 
         const totalStreak = allGoalTasks.reduce((acc, currentTask) => {
-            // After our update, the task we modified is stale in the `allGoalTasks` array.
-            // So, we find it and use its new streak value.
-            if (currentTask.id === task.id) {
+            const updatedTask = tasks.find(t => t.id === currentTask.id);
+            if (updatedTask && updatedTask.id === task.id) {
                 return acc + newStreak;
             }
-            return acc + currentTask.streak;
+            return acc + (updatedTask?.streak || 0);
         }, 0);
         
-        const newProgress = Math.min(100, (totalStreak / targetDays) * 100);
+        const newProgress = Math.min(100, (totalStreak / goal.targetDays) * 100);
 
         await updateDoc(goalRef, {
             progress: newProgress,
@@ -82,7 +84,6 @@ export function DailyTaskList({ tasks, goalId, targetDays }: DailyTaskListProps)
   const handleDeleteTask = async (taskId: string) => {
     try {
         await deleteDoc(doc(db, 'dailyTasks', taskId));
-        // You might want to recalculate progress here as well
         toast({ title: "Task deleted." });
     } catch (error) {
         console.error("Error deleting task: ", error);
@@ -90,33 +91,58 @@ export function DailyTaskList({ tasks, goalId, targetDays }: DailyTaskListProps)
     }
   };
 
-  if (tasks.length === 0) {
-    return <p className="text-xs text-muted-foreground text-center py-2">No daily tasks yet. Add one to get started!</p>;
-  }
-
   return (
-    <ul className="space-y-2">
-      {tasks.map(task => (
-        <li key={task.id} className="flex items-center justify-between p-2 rounded-md bg-background hover:bg-muted/50">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id={`task-${task.id}`}
-              checked={task.completed}
-              onCheckedChange={() => handleTaskCheck(task)}
-            />
-            <label htmlFor={`task-${task.id}`} className="text-sm cursor-pointer">{task.title}</label>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className='flex items-center text-xs text-orange-500 font-semibold'>
-                <Flame className="h-3 w-3 mr-1" />
-                {task.streak}
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+            <div className='flex items-center gap-2'>
+                <CheckSquare className="h-6 w-6" />
+                <CardTitle className="font-headline text-2xl">Daily Tasks</CardTitle>
             </div>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDeleteTask(task.id)}>
-              <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </div>
-        </li>
-      ))}
-    </ul>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <AddTaskSection goals={goals} />
+
+        {tasks.length > 0 ? (
+          <ul className="space-y-2">
+            {tasks.map(task => (
+              <li key={task.id} className="group flex items-center justify-between p-2 rounded-md bg-background hover:bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id={`task-${task.id}`}
+                    checked={task.completed}
+                    onCheckedChange={() => handleTaskCheck(task)}
+                    className="h-5 w-5"
+                  />
+                  <div>
+                    <label htmlFor={`task-${task.id}`} className="text-sm font-medium cursor-pointer">{task.title}</label>
+                    <p className="text-xs text-muted-foreground">{goalsMap.get(task.goalId)?.title || 'Unlinked'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className='flex items-center text-sm text-orange-500 font-semibold'>
+                      <Flame className="h-4 w-4 mr-1" />
+                      {task.streak}
+                  </div>
+                  {task.completed && <Badge variant="secondary">Done</Badge>}
+                  <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeleteTask(task.id)}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+            <div className="mt-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
+                <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                    Add a task above to start tracking your daily progress.
+                </p>
+            </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
