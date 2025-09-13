@@ -48,15 +48,23 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
     },
   });
 
+  const { formState: { isSubmitting }, handleSubmit, reset } = form;
+
   const onSubmit = async (data: TaskFormValues) => {
-    await onAddTask(data);
-    form.reset();
-    onOpenChange(false);
+    try {
+      await onAddTask(data);
+    } catch (error) {
+      console.error("Failed to add task", error);
+      // Optionally, show an error toast to the user
+    } finally {
+      reset();
+      onOpenChange(false);
+    }
   };
   
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      form.reset();
+      reset();
     }
     onOpenChange(open);
   };
@@ -71,7 +79,7 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
             <FormField
               control={form.control}
               name="title"
@@ -110,8 +118,8 @@ export function AddTaskDialog({ isOpen, onOpenChange, onAddTask, goals }: AddTas
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Adding...' : 'Add Task'}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding...' : 'Add Task'}
               </Button>
             </DialogFooter>
           </form>

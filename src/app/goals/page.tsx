@@ -96,16 +96,15 @@ export default function GoalsPage() {
   };
 
   const handleAddTask = async (data: { title: string; goalId: string }) => {
-    if (user) {
-      await addDoc(collection(db, 'dailyTasks'), {
-        ...data,
-        userId: user.uid,
-        completed: false,
-        streak: 0,
-        completedAt: null,
-        createdAt: new Date(),
-      });
-    }
+    if (!user) return;
+    await addDoc(collection(db, 'dailyTasks'), {
+      ...data,
+      userId: user.uid,
+      completed: false,
+      streak: 0,
+      completedAt: null,
+      createdAt: new Date(),
+    });
   };
 
   const handleUpdateTask = async (taskId: string, data: Partial<DailyTask>) => {
