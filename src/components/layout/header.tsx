@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
+import { Separator } from '../ui/separator';
 
 function StaticClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -37,8 +38,10 @@ function StaticClock() {
   }
 
   return (
-    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-      <span>{format(currentTime, 'eeee, MMMM do, yyyy h:mm a')}</span>
+    <div className="hidden md:flex items-center gap-3 text-sm font-medium text-muted-foreground">
+      <span>{format(currentTime, 'eeee, MMMM do, yyyy')}</span>
+      <Separator orientation="vertical" className="h-4" />
+      <span>{format(currentTime, 'h:mm a')}</span>
     </div>
   );
 }
