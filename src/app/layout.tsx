@@ -31,9 +31,9 @@ export default function RootLayout({
               <Sidebar>
                 <SidebarNav />
               </Sidebar>
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col ml-[var(--sidebar-width)]">
                 <Header />
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+                <main className="flex-1 p-4 sm:p-6 md:p-8">
                   {children}
                 </main>
               </div>
@@ -44,4 +44,3 @@ export default function RootLayout({
       </body>
     </html>
   );
-}

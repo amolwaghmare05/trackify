@@ -123,7 +123,8 @@ const SidebarProvider = React.forwardRef<
           <div
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH,
+                "--sidebar-width": "16rem",
+                "--sidebar-width-collapsed": "0rem",
               } as React.CSSProperties
             }
             className={cn(
@@ -165,12 +166,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
+            className="w-[18rem] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             side={side}
           >
             <div className="flex h-full w-full flex-col">{children}</div>
@@ -183,8 +179,8 @@ const Sidebar = React.forwardRef<
       <aside
         ref={ref}
         className={cn(
-          "hidden md:flex flex-col h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out",
-          open ? "w-[--sidebar-width]" : "w-0 overflow-hidden",
+          "fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out",
+          open ? "w-[var(--sidebar-width)]" : "w-0 overflow-hidden",
           className
         )}
         data-side={side}
