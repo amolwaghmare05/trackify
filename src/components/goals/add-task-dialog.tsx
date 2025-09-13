@@ -48,8 +48,14 @@ export function AddTaskDialog({ isOpen, onOpenChange, goals }: AddTaskDialogProp
   const { toast } = useToast();
   const form = useForm<AddTaskFormValues>({
     resolver: zodResolver(addTaskSchema),
-    defaultValues: { title: '' },
+    defaultValues: { title: '', goalId: undefined },
   });
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      form.reset({ title: '', goalId: undefined });
+    }
+  }, [isOpen, form]);
 
   const onSubmit = async (data: AddTaskFormValues) => {
     if (!user) return;
@@ -64,23 +70,15 @@ export function AddTaskDialog({ isOpen, onOpenChange, goals }: AddTaskDialogProp
         createdAt: serverTimestamp(),
       });
       toast({ title: 'Daily task added!' });
-      form.reset();
-      onOpenChange(false);
+      onOpenChange(false); // This will now correctly close the dialog
     } catch (error) {
       console.error("Error adding task: ", error);
       toast({ title: 'Failed to add task.', variant: 'destructive' });
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      form.reset();
-    }
-    onOpenChange(open);
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-headline flex items-center">
