@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Goal, DailyTask } from '@/lib/types';
-import { PlusCircle, Target } from 'lucide-react';
+import { PlusCircle, Target, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddGoalDialog } from '@/components/goals/add-goal-dialog';
 import { GoalCard } from '@/components/goals/goal-card';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
+import { DailyTaskList } from '@/components/goals/daily-task-list';
 
 export default function GoalsPage() {
   const { user, loading } = useAuth();
@@ -106,10 +108,10 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-7xl space-y-8">
       <section id="long-term-goals">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold font-headline">Long-Term Goals</h2>
+          <h2 className="text-2xl font-bold font-headline">My Goals</h2>
           <Button onClick={() => setIsAddGoalDialogOpen(true)} size="sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Goal
@@ -141,6 +143,38 @@ export default function GoalsPage() {
           </div>
         )}
       </section>
+
+      <Separator />
+
+      <section id="daily-tasks">
+        <div className="mb-4">
+            <h2 className="text-2xl font-bold font-headline">Daily Tasks</h2>
+            <p className="text-muted-foreground text-sm">A consolidated list of all your daily tasks.</p>
+        </div>
+        {goals.length > 0 && tasks.length > 0 ? (
+            <div className="space-y-6">
+                {goals.map(goal => {
+                    const goalTasks = tasks.filter(t => t.goalId === goal.id);
+                    if (goalTasks.length === 0) return null;
+                    return (
+                        <div key={goal.id} className="rounded-lg border bg-card p-4">
+                            <h3 className="font-semibold mb-2">{goal.title}</h3>
+                            <DailyTaskList tasks={goalTasks} goalId={goal.id} targetDays={goal.targetDays} />
+                        </div>
+                    )
+                })}
+            </div>
+        ) : (
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center h-auto">
+                <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-bold tracking-tight font-headline">No Daily Tasks Yet</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                    Add tasks to your goals to start tracking your daily progress.
+                </p>
+            </div>
+        )}
+      </section>
+
 
       <AddGoalDialog
         isOpen={isAddGoalDialogOpen}
