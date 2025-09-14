@@ -36,7 +36,7 @@ const prompt = ai.definePrompt({
 
 Here is the user's data:
 - User Name: {{{userName}}}
-- Current Goal: {{{goal}}}
+{{#if goal}}- Current Goal: {{{goal}}}{{/if}}
 - Goal Progress: {{{progressPercentage}}}%
 - Task Consistency Score: {{{consistencyScore}}}%
 
