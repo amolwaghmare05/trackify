@@ -1,8 +1,9 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
+import { AppearanceCard } from '@/components/settings/appearance-card';
+import { AccountCard } from '@/components/settings/account-card';
 
 export default function SettingsPage() {
   return (
@@ -11,19 +12,14 @@ export default function SettingsPage() {
         <Settings className="h-8 w-8 text-primary" />
         <div>
             <h1 className="text-3xl font-bold font-headline tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">Manage your account and application settings.</p>
+            <p className="text-muted-foreground">Manage your account settings and application preferences.</p>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-            <CardTitle>Under Construction</CardTitle>
-            <CardDescription>This page is currently under development. Please check back later!</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <p>Settings and preferences will be available here in a future update.</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-8">
+        <AppearanceCard />
+        <AccountCard />
+      </div>
     </div>
   );
 }
