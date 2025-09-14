@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +15,7 @@ interface DailyTaskListProps {
   tasks: DailyTask[];
   goals: Goal[];
   onAddTask: (data: { title: string; goalId: string }) => void;
-  onUpdateTask: (taskId: string, data: Partial<DailyTask>) => void;
+  onUpdateTask: (task: DailyTask, isCompleted: boolean) => void;
   onDeleteTask: (taskId: string) => void;
 }
 
@@ -26,23 +27,6 @@ export function DailyTaskList({ tasks, goals, onAddTask, onUpdateTask, onDeleteT
     return goal ? goal.title : 'Unassigned';
   };
   
-  const handleToggleTask = (task: DailyTask) => {
-    const isCompleted = !task.completed;
-    let newStreak = task.streak;
-
-    if (isCompleted) {
-        newStreak = (task.streak || 0) + 1;
-    } else {
-        newStreak = Math.max(0, (task.streak || 0) - 1);
-    }
-
-    onUpdateTask(task.id, { 
-        completed: isCompleted,
-        streak: newStreak,
-        completedAt: isCompleted ? new Date() : null 
-    });
-  };
-
   return (
     <>
       <Card>
@@ -67,7 +51,7 @@ export function DailyTaskList({ tasks, goals, onAddTask, onUpdateTask, onDeleteT
                   <Checkbox
                     id={`task-${task.id}`}
                     checked={task.completed}
-                    onCheckedChange={() => handleToggleTask(task)}
+                    onCheckedChange={(checked) => onUpdateTask(task, !!checked)}
                   />
                   <div className="flex-1">
                     <label

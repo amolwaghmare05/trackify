@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import type { Goal, DailyTask } from '@/lib/types';
@@ -89,19 +89,15 @@ export default function GoalsPage() {
 
   const goalsWithProgress = useMemo(() => {
     return goals.map(goal => {
-      const relevantTasks = tasks.filter(task => task.goalId === goal.id && task.completed);
-      const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date((task.completedAt as any).seconds * 1000).toDateString() : '')).size;
-      const progress = goal.targetDays > 0 ? Math.round((completedDays / goal.targetDays) * 100) : 0;
-      
+      const progress = goal.targetDays > 0 ? Math.round((goal.completedDays / goal.targetDays) * 100) : 0;
       const finalProgress = Math.min(progress, 100);
-
-      return { ...goal, progress: finalProgress, completedDays };
+      return { ...goal, progress: finalProgress };
     });
-  }, [goals, tasks]);
+  }, [goals]);
   
   useEffect(() => {
     goalsWithProgress.forEach(goal => {
-      if (goal.progress === 100) {
+      if (goal.progress >= 100) {
         completeGoal(goal);
       }
     });
@@ -153,12 +149,41 @@ export default function GoalsPage() {
     });
   };
 
-  const handleUpdateTask = async (taskId: string, data: Partial<DailyTask>) => {
-    const taskRef = doc(db, 'dailyTasks', taskId);
-    await updateDoc(taskRef, data);
+  const handleUpdateTask = async (task: DailyTask, isCompleted: boolean) => {
+    const taskRef = doc(db, 'dailyTasks', task.id);
+    const goalRef = doc(db, 'goals', task.goalId);
+
+    const batch = writeBatch(db);
+
+    let newStreak = task.streak || 0;
+    if (isCompleted) {
+      newStreak++;
+    } else {
+      newStreak = Math.max(0, newStreak - 1);
+    }
+    
+    batch.update(taskRef, { 
+      completed: isCompleted,
+      streak: newStreak,
+      completedAt: isCompleted ? new Date() : null 
+    });
+
+    batch.update(goalRef, {
+      completedDays: increment(isCompleted ? 1 : -1)
+    });
+
+    await batch.commit();
   };
   
   const handleDeleteTask = async (taskId: string) => {
+    // Before deleting, check if the task was completed to decrement the goal's completedDays
+    const taskToDelete = tasks.find(t => t.id === taskId);
+    if (taskToDelete && taskToDelete.completed) {
+      const goalRef = doc(db, 'goals', taskToDelete.goalId);
+      await updateDoc(goalRef, {
+        completedDays: increment(-1)
+      });
+    }
     await deleteDoc(doc(db, 'dailyTasks', taskId));
   };
 
@@ -183,10 +208,15 @@ export default function GoalsPage() {
         onDeleteTask={handleDeleteTask}
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {chartData && (
+        {chartData ? (
           <>
             <WeeklyProgressChart data={chartData.weeklyProgress} />
             <ConsistencyTrendChart data={chartData.consistencyTrend} />
+          </>
+        ) : (
+          <>
+            <WeeklyProgressChart data={{ data: [], yAxisMax: 5 }} />
+            <ConsistencyTrendChart data={{ daily: [], weekly: [] }} />
           </>
         )}
       </div>
