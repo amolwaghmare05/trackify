@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { app, db } from '@/lib/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,9 +62,18 @@ export default function SignUpPage() {
     try {
       const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Update the user's profile display name
       await updateProfile(userCredential.user, {
         displayName: data.username,
       });
+
+      // Create a document for the user in the 'users' collection
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        xp: 0,
+        // You can add any other initial user data here
+      });
+
       router.push('/');
     } catch (error: any) {
       setError(getFirebaseAuthErrorMessage(error.code));
