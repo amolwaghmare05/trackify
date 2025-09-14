@@ -23,6 +23,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { calculateLevel, getLevelDetails } from '@/lib/levels';
+import { cn } from '@/lib/utils';
 
 function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -56,7 +57,7 @@ function LevelAvatar({ level, className }: { level: number; className?: string }
     const levelInfo = getLevelDetails(level);
     const Icon = levelInfo.icon;
     return (
-        <Avatar className={className}>
+        <Avatar className={cn('border-2 border-primary', className)}>
             <AvatarFallback
                 className="flex items-center justify-center"
                 style={{ backgroundColor: levelInfo.color, color: '#FFF' }}
