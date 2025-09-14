@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export interface Goal {
@@ -8,6 +9,15 @@ export interface Goal {
     completedDays: number;
     progress: number;
     createdAt: Timestamp;
+}
+
+export interface CompletedGoal {
+    id: string;
+    userId: string;
+    title: string;
+    targetDays: number;
+    completedAt: Timestamp | Date;
+    originalCreatedAt: Timestamp;
 }
 
 export interface DailyTask {

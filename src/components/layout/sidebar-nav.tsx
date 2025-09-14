@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Target as TargetIcon, Settings, User, Dumbbell } from 'lucide-react';
+import { LayoutDashboard, Target as TargetIcon, Settings, User, Dumbbell, Trophy } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 import {
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/goals', label: 'Goals', icon: TargetIcon },
   { href: '/workouts', label: 'Workouts', icon: Dumbbell },
+  { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
