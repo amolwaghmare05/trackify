@@ -60,6 +60,7 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
               tickFormatter={(value) => `${value}`}
               domain={[0, data.yAxisMax]}
               allowDecimals={false}
+              interval={1}
             />
             <Tooltip
               cursor={false}
