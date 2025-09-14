@@ -1,51 +1,66 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChartHorizontal, Gem, Trophy, CheckCircle, Dumbbell } from 'lucide-react';
+import { BarChartHorizontal, Gem, Trophy, CheckSquare, Info } from 'lucide-react';
+import { StatCard } from './stat-card';
+import { type UserLevel } from '@/lib/levels';
+import { XpProgressBar } from './xp-progress-bar';
+import { Button } from '../ui/button';
+import { LevelXpDialog } from './level-xp-dialog';
 
 interface StatisticsCardProps {
   xp: number;
+  level: UserLevel;
   goalsCompleted: number;
   dailyTasksDone: number;
   workoutsDone: number;
 }
 
-interface StatItemProps {
-    icon: React.ElementType;
-    value: number;
-    label: string;
-}
+export function StatisticsCard({ xp, level, goalsCompleted, dailyTasksDone, workoutsDone }: StatisticsCardProps) {
+  const [isLevelInfoOpen, setIsLevelInfoOpen] = useState(false);
 
-function StatItem({ icon: Icon, value, label }: StatItemProps) {
-    return (
-        <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-muted/50">
-            <Icon className="h-8 w-8 text-primary mb-2" />
-            <p className="text-3xl font-bold font-headline">{value.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
-    )
-}
-
-export function StatisticsCard({ xp, goalsCompleted, dailyTasksDone, workoutsDone }: StatisticsCardProps) {
   return (
-    <Card>
-        <CardHeader>
-            <div className="flex items-center gap-3">
-                <BarChartHorizontal className="h-6 w-6 text-primary" />
-                <div>
-                    <CardTitle className="font-headline">Your Statistics</CardTitle>
-                    <CardDescription>A summary of your achievements.</CardDescription>
+    <>
+      <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                  <BarChartHorizontal className="h-6 w-6 text-primary" />
+                  <div>
+                      <CardTitle className="font-headline">Your Statistics</CardTitle>
+                      <CardDescription>A summary of your achievements.</CardDescription>
+                  </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsLevelInfoOpen(true)}>
+                <Info className="h-5 w-5" />
+              </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+              <Card className="p-4 bg-muted/50">
+                <div className="flex items-center gap-4">
+                    <Gem className="h-8 w-8 text-primary" />
+                    <div>
+                        <p className="text-2xl font-bold font-headline">{xp.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Current XP</p>
+                    </div>
                 </div>
-            </div>
-        </CardHeader>
-        <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatItem icon={Gem} value={xp} label="Current XP" />
-                <StatItem icon={Trophy} value={goalsCompleted} label="Goals Completed" />
-                <StatItem icon={CheckCircle} value={dailyTasksDone} label="Daily Tasks Done" />
-                <StatItem icon={Dumbbell} value={workoutsDone} label="Workouts Done" />
-            </div>
-        </CardContent>
-    </Card>
+                <XpProgressBar
+                  currentXp={xp}
+                  level={level.level}
+                  levelName={level.name}
+                  xpForNextLevel={level.xpForNextLevel}
+                  xpForCurrentLevel={level.xpForCurrentLevel}
+                />
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <StatCard icon={Trophy} value={goalsCompleted} label="Goals Completed" />
+                  <StatCard icon={CheckSquare} value={dailyTasksDone} label="Daily Tasks Done" />
+                  <StatCard icon={CheckSquare} value={workoutsDone} label="Workouts Done" />
+              </div>
+          </CardContent>
+      </Card>
+      <LevelXpDialog isOpen={isLevelInfoOpen} onOpenChange={setIsLevelInfoOpen} />
+    </>
   );
 }

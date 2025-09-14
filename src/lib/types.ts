@@ -53,5 +53,5 @@ export interface Workout {
 export interface UserProfile {
     uid: string;
     xp: number;
-    // Add other profile fields here if needed in the future
+    level: number;
 }

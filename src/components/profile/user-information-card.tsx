@@ -1,51 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { User as UserIcon, Save, Pencil } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { User as UserIcon, Save, Pencil, X } from 'lucide-react';
+import { LevelAvatar } from './level-avatar';
 
 interface UserInformationCardProps {
   user: User;
   onUpdateName: (newName: string) => Promise<void>;
+  level: number;
 }
 
-const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    }
-    return name.charAt(0).toUpperCase();
-};
-
-export function UserInformationCard({ user, onUpdateName }: UserInformationCardProps) {
+export function UserInformationCard({ user, onUpdateName, level }: UserInformationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(user.displayName || '');
-  const { toast } = useToast();
+  
+  useEffect(() => {
+    setDisplayName(user.displayName || '');
+  }, [user.displayName]);
 
   const handleSave = async () => {
-    if (displayName.trim() === '') {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Name cannot be empty.',
-        });
-        return;
+    if (displayName.trim() !== '' && displayName.trim() !== user.displayName) {
+        await onUpdateName(displayName.trim());
     }
-    await onUpdateName(displayName);
     setIsEditing(false);
-    toast({
-        title: 'Success!',
-        description: 'Your name has been updated.',
-    });
   };
   
+  const handleCancel = () => {
+    setDisplayName(user.displayName || '');
+    setIsEditing(false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -59,10 +48,7 @@ export function UserInformationCard({ user, onUpdateName }: UserInformationCardP
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center space-y-4">
-            <Avatar className="h-24 w-24">
-                <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
-                <AvatarFallback className="text-3xl">{getInitials(user.displayName)}</AvatarFallback>
-            </Avatar>
+            <LevelAvatar level={level} className="h-24 w-24" />
         </div>
 
         <div className="space-y-4">
@@ -77,9 +63,14 @@ export function UserInformationCard({ user, onUpdateName }: UserInformationCardP
                         className="flex-grow"
                     />
                     {isEditing ? (
-                        <Button onClick={handleSave} size="icon">
-                            <Save className="h-4 w-4" />
-                        </Button>
+                        <>
+                           <Button onClick={handleSave} size="icon">
+                                <Save className="h-4 w-4" />
+                            </Button>
+                             <Button onClick={handleCancel} variant="outline" size="icon">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </>
                     ) : (
                         <Button onClick={() => setIsEditing(true)} variant="outline" size="icon">
                             <Pencil className="h-4 w-4" />
