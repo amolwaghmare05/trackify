@@ -1,4 +1,4 @@
-import { Star, Gem, Shield, Crown } from 'lucide-react';
+import { Star, Gem, Shield, Crown, User } from 'lucide-react';
 
 export const LEVEL_THRESHOLDS = [
     { level: 1, xp: 0, name: 'Bronze', color: '#CD7F32', icon: Star, description: "Just starting out." },
@@ -17,11 +17,19 @@ export interface UserLevel {
 }
 
 export const getLevelDetails = (level: number) => {
-    const levelData = LEVEL_THRESHOLDS.find(l => l.level === level) || LEVEL_THRESHOLDS[0];
+    const levelData = LEVEL_THRESHOLDS.find(l => l.level === level);
+    if (levelData) {
+      return {
+        name: levelData.name,
+        color: levelData.color,
+        icon: levelData.icon,
+      };
+    }
+    // Return a default for unknown levels
     return {
-      name: levelData.name,
-      color: levelData.color,
-      icon: levelData.icon,
+      name: 'User',
+      color: '#808080', // Gray color
+      icon: User,
     };
   };
 
