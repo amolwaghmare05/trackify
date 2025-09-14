@@ -13,13 +13,19 @@ import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-cha
 import { processTasksForCharts } from '@/lib/chart-utils';
 
 async function completeGoal(goal: Goal) {
-    if (!goal || !goal.userId) return;
+    if (!goal || !goal.userId || !goal.id) return;
 
     const completedGoalRef = doc(collection(db, 'completedGoals'));
     const originalGoalRef = doc(db, 'goals', goal.id);
 
     try {
         await runTransaction(db, async (transaction) => {
+            const originalDoc = await transaction.get(originalGoalRef);
+            // Only proceed if the original goal still exists
+            if (!originalDoc.exists()) {
+                return;
+            }
+
             transaction.set(completedGoalRef, {
                 userId: goal.userId,
                 title: goal.title,
@@ -86,22 +92,24 @@ export default function GoalsPage() {
   }, [user]);
 
   const goalsWithProgress = useMemo(() => {
-    if (!goals || goals.length === 0) {
-      return [];
-    }
     return goals.map(goal => {
       const relevantTasks = tasks.filter(task => task.goalId === goal.id && task.completed);
       const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date((task.completedAt as any).seconds * 1000).toDateString() : '')).size;
       const progress = goal.targetDays > 0 ? Math.round((completedDays / goal.targetDays) * 100) : 0;
       
       const finalProgress = Math.min(progress, 100);
-      if (finalProgress === 100) {
-        completeGoal({ ...goal, progress: finalProgress, completedDays });
-      }
 
       return { ...goal, progress: finalProgress, completedDays };
     });
   }, [goals, tasks]);
+  
+  useEffect(() => {
+    goalsWithProgress.forEach(goal => {
+      if (goal.progress === 100) {
+        completeGoal(goal);
+      }
+    });
+  }, [goalsWithProgress]);
 
 
   const handleAddGoal = async (data: { title: string; targetDays: number }) => {
