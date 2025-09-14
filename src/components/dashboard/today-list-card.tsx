@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -41,8 +42,7 @@ export function TodayListCard() {
       const startOfTomorrow = Timestamp.fromDate(tomorrow);
 
       const tasksQuery = query(
-        collection(db, 'todayTasks'),
-        where('userId', '==', user.uid),
+        collection(db, 'users', user.uid, 'todayTasks'),
         where('createdAt', '>=', startOfToday),
         where('createdAt', '<', startOfTomorrow),
         orderBy('createdAt', 'desc')
@@ -74,7 +74,7 @@ export function TodayListCard() {
 
   const handleAddTask = async (title: string) => {
     if (!user) return;
-    await addDoc(collection(db, 'todayTasks'), {
+    await addDoc(collection(db, 'users', user.uid, 'todayTasks'), {
       title,
       userId: user.uid,
       completed: false,
@@ -84,12 +84,14 @@ export function TodayListCard() {
   };
 
   const handleUpdateTask = async (taskId: string, data: Partial<TodayTask>) => {
-    const taskRef = doc(db, 'todayTasks', taskId);
+    if (!user) return;
+    const taskRef = doc(db, 'users', user.uid, 'todayTasks', taskId);
     await updateDoc(taskRef, data);
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    await deleteDoc(doc(db, 'todayTasks', taskId));
+    if (!user) return;
+    await deleteDoc(doc(db, 'users', user.uid, 'todayTasks', taskId));
   };
 
   return (

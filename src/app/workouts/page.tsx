@@ -21,7 +21,7 @@ export default function WorkoutsPage() {
 
   useEffect(() => {
     if (user) {
-      const workoutsQuery = query(collection(db, 'workouts'), where('userId', '==', user.uid));
+      const workoutsQuery = query(collection(db, 'users', user.uid, 'workouts'));
       const unsubscribe = onSnapshot(workoutsQuery, (querySnapshot) => {
         const userWorkouts: Workout[] = [];
         querySnapshot.forEach((doc) => {
@@ -42,7 +42,7 @@ export default function WorkoutsPage() {
 
   const handleAddWorkout = async (title: string) => {
     if (!user) return;
-    await addDoc(collection(db, 'workouts'), {
+    await addDoc(collection(db, 'users', user.uid, 'workouts'), {
       title,
       userId: user.uid,
       completed: false,
@@ -53,12 +53,14 @@ export default function WorkoutsPage() {
   };
 
   const handleUpdateWorkout = async (workoutId: string, data: Partial<Workout>) => {
-    const workoutRef = doc(db, 'workouts', workoutId);
+    if (!user) return;
+    const workoutRef = doc(db, 'users', user.uid, 'workouts', workoutId);
     await updateDoc(workoutRef, data);
   };
 
   const handleDeleteWorkout = async (workoutId: string) => {
-    await deleteDoc(doc(db, 'workouts', workoutId));
+    if (!user) return;
+    await deleteDoc(doc(db, 'users', user.uid, 'workouts', workoutId));
   };
 
   if (loading) {

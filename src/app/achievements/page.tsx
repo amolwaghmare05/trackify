@@ -45,8 +45,7 @@ export default function AchievementsPage() {
   useEffect(() => {
     if (user) {
       const q = query(
-        collection(db, 'completedGoals'), 
-        where('userId', '==', user.uid),
+        collection(db, 'users', user.uid, 'completedGoals'), 
         orderBy('completedAt', 'desc')
       );
       

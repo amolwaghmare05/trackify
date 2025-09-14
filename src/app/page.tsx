@@ -30,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
     if (user) {
-      const goalsQuery = query(collection(db, 'goals'), where('userId', '==', user.uid));
+      const goalsQuery = query(collection(db, 'users', user.uid, 'goals'));
       const unsubscribeGoals = onSnapshot(goalsQuery, (querySnapshot) => {
         const userGoals: Goal[] = [];
         querySnapshot.forEach((doc) => {
@@ -39,7 +39,7 @@ export default function Home() {
         setGoals(userGoals);
       });
 
-      const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
+      const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'));
       const unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
         const userTasks: DailyTask[] = [];
         querySnapshot.forEach((doc) => {

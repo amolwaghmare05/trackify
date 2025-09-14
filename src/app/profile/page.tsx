@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -33,15 +34,15 @@ export default function ProfilePage() {
       });
 
       const fetchStats = async () => {
-        const completedGoalsQuery = query(collection(db, 'completedGoals'), where('userId', '==', user.uid));
+        const completedGoalsQuery = query(collection(db, 'users', user.uid, 'completedGoals'));
         const completedGoalsSnapshot = await getDocs(completedGoalsQuery);
         const goalsCompleted = completedGoalsSnapshot.size;
 
-        const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid), where('completed', '==', true));
+        const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'), where('completed', '==', true));
         const tasksSnapshot = await getDocs(tasksQuery);
         const dailyTasksDone = tasksSnapshot.size;
 
-        const workoutsQuery = query(collection(db, 'workouts'), where('userId', '==', user.uid), where('completed', '==', true));
+        const workoutsQuery = query(collection(db, 'users', user.uid, 'workouts'), where('completed', '==', true));
         const workoutsSnapshot = await getDocs(workoutsQuery);
         const workoutsDone = workoutsSnapshot.size;
         

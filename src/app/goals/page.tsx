@@ -16,8 +16,8 @@ import { format } from 'date-fns';
 async function completeGoal(goal: Goal) {
     if (!goal || !goal.userId || !goal.id) return;
 
-    const completedGoalRef = doc(collection(db, 'completedGoals'));
-    const originalGoalRef = doc(db, 'goals', goal.id);
+    const completedGoalRef = doc(collection(db, 'users', goal.userId, 'completedGoals'));
+    const originalGoalRef = doc(db, 'users', goal.userId, 'goals', goal.id);
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -51,7 +51,7 @@ export default function GoalsPage() {
 
   useEffect(() => {
     if (user) {
-      const goalsQuery = query(collection(db, 'goals'), where('userId', '==', user.uid));
+      const goalsQuery = query(collection(db, 'users', user.uid, 'goals'));
       const unsubscribeGoals = onSnapshot(goalsQuery, (querySnapshot) => {
         const userGoals: Goal[] = [];
         querySnapshot.forEach((doc) => {
@@ -61,7 +61,7 @@ export default function GoalsPage() {
         if(loading) setLoading(false);
       });
 
-      const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
+      const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'));
       const unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
         const userTasks: DailyTask[] = [];
         querySnapshot.forEach((doc) => {
@@ -111,7 +111,7 @@ export default function GoalsPage() {
 
   const handleAddGoal = async (data: { title: string; targetDays: number }) => {
     if (user) {
-      await addDoc(collection(db, 'goals'), {
+      await addDoc(collection(db, 'users', user.uid, 'goals'), {
         ...data,
         userId: user.uid,
         completedDays: 0,
@@ -121,16 +121,18 @@ export default function GoalsPage() {
   };
 
   const handleUpdateGoal = async (goalId: string, data: { title: string; targetDays: number }) => {
-    const goalRef = doc(db, 'goals', goalId);
+    if (!user) return;
+    const goalRef = doc(db, 'users', user.uid, 'goals', goalId);
     await updateDoc(goalRef, data);
   };
 
   const handleDeleteGoal = async (goalId: string) => {
+    if (!user) return;
     const batch = writeBatch(db);
-    const goalRef = doc(db, 'goals', goalId);
+    const goalRef = doc(db, 'users', user.uid, 'goals', goalId);
     batch.delete(goalRef);
     
-    const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user?.uid), where('goalId', '==', goalId));
+    const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'), where('goalId', '==', goalId));
     const tasksSnapshot = await getDocs(tasksQuery);
     tasksSnapshot.forEach(doc => {
       batch.delete(doc.ref);
@@ -141,7 +143,7 @@ export default function GoalsPage() {
 
   const handleAddTask = (data: { title: string; goalId: string }) => {
     if (!user) return;
-    addDoc(collection(db, 'dailyTasks'), {
+    addDoc(collection(db, 'users', user.uid, 'dailyTasks'), {
       ...data,
       userId: user.uid,
       completed: false,
@@ -156,8 +158,8 @@ export default function GoalsPage() {
 
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const historyDocRef = doc(db, 'users', user.uid, 'dailyTaskHistory', todayStr);
-    const taskRef = doc(db, 'dailyTasks', task.id);
-    const goalRef = doc(db, 'goals', task.goalId);
+    const taskRef = doc(db, 'users', user.uid, 'dailyTasks', task.id);
+    const goalRef = doc(db, 'users', user.uid, 'goals', task.goalId);
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -185,7 +187,7 @@ export default function GoalsPage() {
             }
 
             // Update history
-            const allTasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
+            const allTasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'));
             const allTasksSnapshot = await getDocs(allTasksQuery);
             const totalTasks = allTasksSnapshot.size;
             const completedTasks = allTasksSnapshot.docs.filter(doc => {
@@ -209,16 +211,16 @@ export default function GoalsPage() {
     if (!user) return;
 
     const taskToDelete = tasks.find(t => t.id === taskId);
+    if (!taskToDelete) return;
+
     const batch = writeBatch(db);
 
-    if (taskToDelete) {
-        if (taskToDelete.completed) {
-            const goalRef = doc(db, 'goals', taskToDelete.goalId);
-            batch.update(goalRef, { completedDays: increment(-1) });
-        }
-        const taskRef = doc(db, 'dailyTasks', taskId);
-        batch.delete(taskRef);
+    if (taskToDelete.completed) {
+        const goalRef = doc(db, 'users', user.uid, 'goals', taskToDelete.goalId);
+        batch.update(goalRef, { completedDays: increment(-1) });
     }
+    const taskRef = doc(db, 'users', user.uid, 'dailyTasks', taskId);
+    batch.delete(taskRef);
 
     await batch.commit();
 
