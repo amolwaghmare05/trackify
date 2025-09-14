@@ -1,6 +1,7 @@
 import { Star, Gem, Shield, Crown, User } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-export const LEVEL_THRESHOLDS = [
+export const LEVEL_THRESHOLDS: { level: number; xp: number; name: string; color: string; icon: LucideIcon; description: string; }[] = [
     { level: 1, xp: 0, name: 'Bronze', color: '#CD7F32', icon: Star, description: "Just starting out." },
     { level: 2, xp: 100, name: 'Silver', color: '#C0C0C0', icon: Star, description: "Making good progress." },
     { level: 3, xp: 250, name: 'Gold', color: '#FFD700', icon: Gem, description: "Showing real dedication." },
@@ -25,10 +26,10 @@ export const getLevelDetails = (level: number) => {
         icon: levelData.icon,
       };
     }
-    // Return a default for unknown levels
+    // Return a default for unknown levels to prevent crashes
     return {
       name: 'User',
-      color: '#808080', // Gray color
+      color: '#808080', // A neutral gray color
       icon: User,
     };
   };
