@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-import type { UserProfile } from '@/lib/types';
+import type { UserProfile, DailyTaskHistory, WorkoutHistory } from '@/lib/types';
 import { updateProfile } from 'firebase/auth';
 import { UserInformationCard } from '@/components/profile/user-information-card';
 import { StatisticsCard } from '@/components/profile/statistics-card';
@@ -34,17 +34,26 @@ export default function ProfilePage() {
       });
 
       const fetchStats = async () => {
+        // 1. Goals Completed
         const completedGoalsQuery = query(collection(db, 'users', user.uid, 'completedGoals'));
         const completedGoalsSnapshot = await getDocs(completedGoalsQuery);
         const goalsCompleted = completedGoalsSnapshot.size;
 
-        const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'), where('completed', '==', true));
-        const tasksSnapshot = await getDocs(tasksQuery);
-        const dailyTasksDone = tasksSnapshot.size;
+        // 2. Daily Tasks Done (from history)
+        const dailyHistoryQuery = query(collection(db, 'users', user.uid, 'dailyTaskHistory'));
+        const dailyHistorySnapshot = await getDocs(dailyHistoryQuery);
+        const dailyTasksDone = dailyHistorySnapshot.docs.reduce((sum, doc) => {
+            const history = doc.data() as DailyTaskHistory;
+            return sum + (history.completed || 0);
+        }, 0);
 
-        const workoutsQuery = query(collection(db, 'users', user.uid, 'workouts'), where('completed', '==', true));
-        const workoutsSnapshot = await getDocs(workoutsQuery);
-        const workoutsDone = workoutsSnapshot.size;
+        // 3. Workouts Done (from history)
+        const workoutHistoryQuery = query(collection(db, 'users', user.uid, 'workoutHistory'));
+        const workoutHistorySnapshot = await getDocs(workoutHistoryQuery);
+        const workoutsDone = workoutHistorySnapshot.docs.reduce((sum, doc) => {
+            const history = doc.data() as WorkoutHistory;
+            return sum + (history.completed || 0);
+        }, 0);
         
         setStats({ goalsCompleted, dailyTasksDone, workoutsDone });
       };
