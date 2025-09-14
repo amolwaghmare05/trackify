@@ -4,7 +4,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
-import { getWeek, format } from 'date-fns';
+import { getWeekOfMonth, format } from 'date-fns';
 import { CheckCircle } from 'lucide-react';
 
 interface WeeklyProgressChartProps {
@@ -23,7 +23,7 @@ const chartConfig = {
 
 export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
   const now = new Date();
-  const weekNumber = getWeek(now, { weekStartsOn: 1 });
+  const weekNumber = getWeekOfMonth(now, { weekStartsOn: 1 });
   const monthName = format(now, 'MMMM');
 
   return (
