@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -68,7 +69,7 @@ export default function Home() {
   const goalsWithProgress = useMemo(() => {
     return goals.map(goal => {
       const relevantTasks = tasks.filter(task => task.goalId === goal.id && task.completed);
-      const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date(task.completedAt.seconds * 1000).toDateString() : '')).size;
+      const completedDays = new Set(relevantTasks.map(task => task.completedAt ? new Date((task.completedAt as any).seconds * 1000).toDateString() : '')).size;
       const progress = goal.targetDays > 0 ? Math.round((completedDays / goal.targetDays) * 100) : 0;
       return { ...goal, progress: Math.min(progress, 100), completedDays };
     });
