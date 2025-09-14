@@ -1,14 +1,17 @@
 
 'use client';
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { getWeek, format } from 'date-fns';
 import { CheckCircle } from 'lucide-react';
 
 interface WeeklyProgressChartProps {
-  data: { day: string; 'Tasks Completed': number }[];
+  data: {
+    data: { day: string; 'Tasks Completed': number }[];
+    yAxisMax: number;
+  };
 }
 
 const chartConfig = {
@@ -38,21 +41,33 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-          <BarChart data={data}>
-            <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+          <BarChart data={data.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis 
+                dataKey="day" 
+                stroke="#888888" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                tickMargin={10}
+            />
             <YAxis
               stroke="#888888"
               fontSize={12}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => `${value}`}
+              domain={[0, data.yAxisMax]}
+              allowDecimals={false}
             />
             <Tooltip
+              cursor={false}
               content={<ChartTooltipContent 
-                formatter={(value) => `${value} tasks`} 
+                formatter={(value) => `${value} tasks`}
+                indicator='dot'
               />}
             />
-            <Bar dataKey="Tasks Completed" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Tasks Completed" fill="hsl(var(--primary))" radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>

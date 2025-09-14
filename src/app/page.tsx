@@ -16,7 +16,10 @@ export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [chartData, setChartData] = useState<{
-    weeklyProgress: any[];
+    weeklyProgress: {
+        data: { day: string; 'Tasks Completed': number }[];
+        yAxisMax: number;
+    };
     consistencyTrend: { daily: any[]; weekly: any[] };
   } | null>(null);
 

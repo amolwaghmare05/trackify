@@ -17,7 +17,10 @@ export default function GoalsPage() {
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<{
-    weeklyProgress: any[];
+    weeklyProgress: {
+        data: { day: string; 'Tasks Completed': number }[];
+        yAxisMax: number;
+    };
     consistencyTrend: { daily: any[]; weekly: any[] };
   } | null>(null);
 
@@ -104,9 +107,9 @@ export default function GoalsPage() {
     await batch.commit();
   };
 
-  const handleAddTask = async (data: { title: string; goalId: string }) => {
+  const handleAddTask = (data: { title: string; goalId: string }) => {
     if (!user) return;
-    await addDoc(collection(db, 'dailyTasks'), {
+    addDoc(collection(db, 'dailyTasks'), {
       ...data,
       userId: user.uid,
       completed: false,

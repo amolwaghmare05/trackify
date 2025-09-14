@@ -1,16 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import type { Workout } from '@/lib/types';
 import { WorkoutTrackerCard } from '@/components/workouts/workout-tracker-card';
+import { WorkoutDisciplineChart } from '@/components/workouts/workout-discipline-chart';
+import { processWorkoutsForChart } from '@/lib/chart-utils';
 
 export default function WorkoutsPage() {
   const { user } = useAuth();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<{
+    daily: { date: string; discipline: number; isToday?: string | null }[];
+    weekly: { week: string; discipline: number }[];
+  } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -21,12 +27,14 @@ export default function WorkoutsPage() {
           userWorkouts.push({ id: doc.id, ...doc.data() } as Workout);
         });
         setWorkouts(userWorkouts);
+        setChartData(processWorkoutsForChart(userWorkouts));
         setLoading(false);
       });
 
       return () => unsubscribe();
     } else {
       setWorkouts([]);
+      setChartData(null);
       setLoading(false);
     }
   }, [user]);
@@ -58,6 +66,7 @@ export default function WorkoutsPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      {chartData && <WorkoutDisciplineChart data={chartData} />}
       <WorkoutTrackerCard
         workouts={workouts}
         onAddWorkout={handleAddWorkout}
