@@ -1,6 +1,8 @@
+
 'use client';
 
 import { getLevelDetails } from "@/lib/levels";
+import { cn } from "@/lib/utils";
 
 interface UserBadgeProps {
   level: number;
@@ -13,10 +15,13 @@ export function UserBadge({ level, className }: UserBadgeProps) {
 
   return (
     <div
-      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${className}`}
-      style={{ borderColor: levelInfo.color, backgroundColor: `${levelInfo.color}1A` }}
+      className={cn(
+        'flex items-center justify-center rounded-full',
+        className
+      )}
+      style={{ borderColor: levelInfo.color, backgroundColor: `${levelInfo.color}3A` }}
     >
-      <Icon className="h-5 w-5" style={{ color: levelInfo.color }} />
+      <Icon className="h-3/4 w-3/4" style={{ color: levelInfo.color }} />
     </div>
   );
 }

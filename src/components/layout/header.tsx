@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Target, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,6 +20,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { calculateLevel } from '@/lib/levels';
+import { UserBadge } from '../profile/user-badge';
+import { cn } from '@/lib/utils';
+
 
 function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -58,6 +63,22 @@ function LiveClock() {
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
+  const [level, setLevel] = useState(1);
+
+  useEffect(() => {
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+          const userProfile = doc.data();
+          const userLevel = calculateLevel(userProfile.xp ?? 0);
+          setLevel(userLevel.level);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
+
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -82,12 +103,19 @@ export function Header() {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
-                  <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
-                </Avatar>
-              </Button>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Avatar className="h-9 w-9">
+                        <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
+                        <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+                    </Avatar>
+                     <UserBadge 
+                        level={level}
+                        className={cn(
+                            "absolute bottom-0 right-0 h-4 w-4 transform translate-x-1/4 translate-y-1/4",
+                            "border-2 border-card" 
+                        )}
+                     />
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
