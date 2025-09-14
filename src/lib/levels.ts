@@ -1,13 +1,15 @@
+
 import { Star, Gem, Shield, Crown, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+// Updated level configuration based on the new spec
 export const LEVEL_THRESHOLDS: { level: number; xp: number; name: string; color: string; icon: LucideIcon; description: string; }[] = [
-    { level: 1, xp: 0, name: 'Bronze', color: '#CD7F32', icon: Star, description: "Just starting out." },
-    { level: 2, xp: 100, name: 'Silver', color: '#C0C0C0', icon: Star, description: "Making good progress." },
-    { level: 3, xp: 250, name: 'Gold', color: '#FFD700', icon: Gem, description: "Showing real dedication." },
-    { level: 4, xp: 500, name: 'Platinum', color: '#E5E4E2', icon: Gem, description: "A consistent achiever." },
-    { level: 5, xp: 1000, name: 'Diamond', color: '#B9F2FF', icon: Shield, description: "Master of your goals." },
-    { level: 6, xp: 2000, name: 'Champion', color: '#A365E5', icon: Crown, description: "Truly unstoppable." },
+    { level: 1, xp: 0,    name: 'Bronze',   color: '#FFD700', icon: Star, description: "Just starting out." },
+    { level: 2, xp: 100,  name: 'Silver',   color: '#A0AEC0', icon: Star, description: "Making good progress." },
+    { level: 3, xp: 250,  name: 'Gold',     color: '#F6E05E', icon: Star, description: "Showing real dedication." },
+    { level: 4, xp: 500,  name: 'Platinum', color: '#48BB78', icon: Shield, description: "A consistent achiever." },
+    { level: 5, xp: 1000, name: 'Diamond',  color: '#4299E1', icon: Gem, description: "Master of your goals." },
+    { level: 6, xp: 2000, name: 'Master',   color: '#9F7AEA', icon: Gem, description: "Truly unstoppable." },
 ];
 
 export interface UserLevel {
@@ -29,7 +31,7 @@ export const getLevelDetails = (level: number) => {
     // Return a default for unknown levels to prevent crashes
     return {
       name: 'User',
-      color: '#808080', // A neutral gray color
+      color: '#A0AEC0', // A neutral gray color
       icon: User,
     };
   };

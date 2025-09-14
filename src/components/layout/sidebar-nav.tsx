@@ -26,6 +26,7 @@ const navItems = [
   { href: '/workouts', label: 'Workouts', icon: Dumbbell },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const getInitials = (name: string | null | undefined) => {

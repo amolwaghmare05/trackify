@@ -3,12 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Target, User, LogOut } from 'lucide-react';
+import { Settings as SettingsIcon, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
 import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,24 +22,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { calculateLevel } from '@/lib/levels';
-import { UserBadge } from '../profile/user-badge';
-import { cn } from '@/lib/utils';
-
+import { calculateLevel, getLevelDetails } from '@/lib/levels';
 
 function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    // Set initial time on the client to avoid hydration mismatch
     setCurrentTime(new Date());
-
-    // Update the time every second
     const intervalId = setInterval(() => {
       setCurrentTime(new Date());
-    }, 1000); // 1000 milliseconds = 1 second
-
-    // Clean up the interval on component unmount
+    }, 1000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -59,11 +52,25 @@ function LiveClock() {
   );
 }
 
+function LevelAvatar({ level, className }: { level: number; className?: string }) {
+    const levelInfo = getLevelDetails(level);
+    const Icon = levelInfo.icon;
+    return (
+        <Avatar className={className}>
+            <AvatarFallback
+                className="flex items-center justify-center"
+                style={{ backgroundColor: levelInfo.color, color: '#FFF' }}
+            >
+                <Icon className="h-5 w-5" />
+            </AvatarFallback>
+        </Avatar>
+    );
+}
 
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
-  const [level, setLevel] = useState(1);
+  const [userLevel, setUserLevel] = useState<ReturnType<typeof calculateLevel> | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -71,8 +78,9 @@ export function Header() {
       const unsubscribe = onSnapshot(userDocRef, (doc) => {
         if (doc.exists()) {
           const userProfile = doc.data();
-          const userLevel = calculateLevel(userProfile.xp ?? 0);
-          setLevel(userLevel.level);
+          setUserLevel(calculateLevel(userProfile.xp ?? 0));
+        } else {
+          setUserLevel(calculateLevel(0));
         }
       });
       return () => unsubscribe();
@@ -85,59 +93,47 @@ export function Header() {
     router.push('/sign-in');
   };
   
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    }
-    return name.charAt(0).toUpperCase();
-  };
-
   return (
-    <header className="flex h-16 items-center justify-between p-4 bg-card text-card-foreground border-b sticky top-0 z-30">
+    <header className="flex h-16 items-center justify-between px-4 sm:px-6 bg-card text-card-foreground border-b sticky top-0 z-30">
       <div className="flex items-center gap-2">
          <LiveClock />
       </div>
       <div className="flex items-center gap-4 ml-auto">
-        {user ? (
+        {user && userLevel ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? 'User'} />
-                        <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
-                    </Avatar>
-                     <UserBadge 
-                        level={level}
-                        className={cn(
-                            "absolute bottom-0 right-0 h-4 w-4 transform translate-x-1/4 translate-y-1/4",
-                            "border-2 border-card" 
-                        )}
-                     />
+                <Button variant="ghost" className="flex items-center gap-3 h-auto px-2 py-1">
+                    <LevelAvatar level={userLevel.level} className="h-9 w-9" />
+                    <div className="hidden sm:flex flex-col items-start">
+                        <span className="font-medium text-sm">{user.displayName || 'User'}</span>
+                        <span className="text-xs text-muted-foreground">{userLevel.name}</span>
+                    </div>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                 <Link href="/settings">
+                    <SettingsIcon className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={() => router.push('/sign-in')} variant="ghost">
-            <User className="h-5 w-5 mr-2" />
-            Sign In
-          </Button>
+          <Skeleton className="h-9 w-32" />
         )}
       </div>
     </header>
