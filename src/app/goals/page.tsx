@@ -164,6 +164,7 @@ export default function GoalsPage() {
     try {
         await runTransaction(db, async (transaction) => {
             const taskDoc = await transaction.get(taskRef);
+            const goalDoc = await transaction.get(goalRef);
             if (!taskDoc.exists()) return;
 
             // Update task
@@ -179,8 +180,8 @@ export default function GoalsPage() {
                 completedAt: isCompleted ? new Date() : null 
             });
 
-            // Update goal
-            if (isCompleted !== task.completed) {
+            // Update goal only if it exists
+            if (goalDoc.exists() && isCompleted !== task.completed) {
               transaction.update(goalRef, {
                   completedDays: increment(isCompleted ? 1 : -1)
               });
