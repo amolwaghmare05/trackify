@@ -29,3 +29,13 @@ export interface TodayTask {
     isPrimary: boolean;
     createdAt: Timestamp;
 }
+
+export interface Workout {
+    id: string;
+    userId: string;
+    title: string;
+    completed: boolean;
+    streak: number;
+    completedAt: Timestamp | Date | null;
+    createdAt: Timestamp;
+}

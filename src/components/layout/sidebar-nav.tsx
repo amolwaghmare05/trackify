@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Target as TargetIcon, Settings, User } from 'lucide-react';
+import { LayoutDashboard, Target as TargetIcon, Settings, User, Dumbbell } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 import {
@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/goals', label: 'Goals', icon: TargetIcon },
+  { href: '/workouts', label: 'Workouts', icon: Dumbbell },
 ];
 
 const getInitials = (name: string | null | undefined) => {
