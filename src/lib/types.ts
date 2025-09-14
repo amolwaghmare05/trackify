@@ -83,14 +83,8 @@ export interface MonthlySummary {
     discipline?: number;
 }
 
-export interface XpDataPoint {
-    date: string;
-    xp: number;
-}
-
 export interface ReportsPageData {
     activityBreakdown: ActivityBreakdownData[];
     taskConsistency: MonthlySummary[];
     workoutDiscipline: MonthlySummary[];
-    xpGrowth: XpDataPoint[];
 }

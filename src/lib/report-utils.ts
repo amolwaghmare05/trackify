@@ -1,6 +1,6 @@
 
 import { format, getMonth, getYear, startOfDay } from 'date-fns';
-import type { DailyTaskHistory, WorkoutHistory, CompletedGoal, ActivityBreakdownData, MonthlySummary, XpDataPoint } from './types';
+import type { DailyTaskHistory, WorkoutHistory, CompletedGoal, ActivityBreakdownData, MonthlySummary } from './types';
 
 // XP constants
 const XP_PER_WORKOUT = 10;
@@ -63,37 +63,10 @@ export const processHistoryForReports = (
     const taskConsistency: MonthlySummary[] = taskConsistencyMonthly.map(d => ({ month: d.month, consistency: d.percentage }));
     const workoutDiscipline: MonthlySummary[] = workoutDisciplineMonthly.map(d => ({ month: d.month, discipline: d.percentage }));
 
-    // 4. XP Growth
-    const xpEvents: { date: Date, xp: number }[] = [];
-    taskHistory.forEach(h => xpEvents.push({ date: getHistoryDate(h), xp: h.completed * XP_PER_TASK }));
-    workoutHistory.forEach(h => xpEvents.push({ date: getHistoryDate(h), xp: h.completed * XP_PER_WORKOUT }));
-    completedGoals.forEach(g => xpEvents.push({ date: getHistoryDate(g), xp: XP_PER_GOAL }));
-
-    xpEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    let cumulativeXp = 0;
-    const dailyXpMap = new Map<string, number>();
-
-    xpEvents.forEach(event => {
-        const dayKey = format(startOfDay(event.date), 'yyyy-MM-dd');
-        dailyXpMap.set(dayKey, (dailyXpMap.get(dayKey) || 0) + event.xp);
-    });
-
-    const sortedDays = Array.from(dailyXpMap.keys()).sort();
-    const xpGrowth: XpDataPoint[] = [];
-
-    sortedDays.forEach(dayKey => {
-        cumulativeXp += dailyXpMap.get(dayKey) || 0;
-        xpGrowth.push({
-            date: format(new Date(dayKey), 'MMM d, yyyy'),
-            xp: cumulativeXp
-        });
-    });
 
     return {
         activityBreakdown,
         taskConsistency,
         workoutDiscipline,
-        xpGrowth,
     };
 };

@@ -11,7 +11,6 @@ import { BarChartHorizontal } from 'lucide-react';
 import { ActivityBreakdownChart } from '@/components/reports/activity-breakdown-chart';
 import { TaskConsistencyChart } from '@/components/reports/task-consistency-chart';
 import { WorkoutDisciplineChart as MonthlyWorkoutDisciplineChart } from '@/components/reports/workout-discipline-chart'; // Renamed to avoid conflict
-import { XpGrowthChart } from '@/components/reports/xp-growth-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -64,7 +63,6 @@ export default function ReportsPage() {
                 <Skeleton className="h-[450px] w-full" />
                 <Skeleton className="h-[450px] w-full" />
                 <Skeleton className="h-[450px] w-full" />
-                <Skeleton className="h-[450px] w-full" />
             </div>
         </div>
     );
@@ -99,7 +97,6 @@ export default function ReportsPage() {
         <ActivityBreakdownChart data={reportData.activityBreakdown} />
         <TaskConsistencyChart data={reportData.taskConsistency} />
         <MonthlyWorkoutDisciplineChart data={reportData.workoutDiscipline} />
-        <XpGrowthChart data={reportData.xpGrowth} />
       </div>
     </div>
   );
