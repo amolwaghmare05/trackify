@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
 import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
 import { processTasksForCharts } from '@/lib/chart-utils';
+import { TodayListCard } from '@/components/dashboard/today-list-card';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -53,11 +54,14 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 space-y-8">
        <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Welcome back, {user.displayName}!</h1>
-        <p className="text-muted-foreground">Here's a look at your progress.</p>
+        <p className="text-muted-foreground">Here's a look at your progress and today's tasks.</p>
       </div>
+
+      <TodayListCard />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {chartData && (
           <>

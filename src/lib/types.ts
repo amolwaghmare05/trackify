@@ -20,3 +20,12 @@ export interface DailyTask {
     completedAt: Timestamp | Date | null;
     createdAt: Timestamp;
 }
+
+export interface TodayTask {
+    id: string;
+    userId: string;
+    title: string;
+    completed: boolean;
+    isPrimary: boolean;
+    createdAt: Timestamp;
+}
