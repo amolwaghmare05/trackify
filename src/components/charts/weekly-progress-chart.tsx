@@ -25,8 +25,6 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
   const now = new Date();
   const weekNumber = getWeekOfMonth(now, { weekStartsOn: 1 });
   const monthName = format(now, 'MMMM');
-  const chartData = data?.data || [];
-  const yAxisMax = data?.yAxisMax || 5;
 
 
   return (
@@ -44,7 +42,7 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-          <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+          <BarChart data={data.data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis 
                 dataKey="day" 
@@ -60,7 +58,7 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => `${value}`}
-              domain={[0, yAxisMax]}
+              domain={[0, data.yAxisMax]}
               allowDecimals={false}
             />
             <Tooltip
