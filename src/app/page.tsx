@@ -102,14 +102,14 @@ export default function Home() {
         <p className="text-muted-foreground">Here's a look at your progress and today's tasks.</p>
       </div>
 
+      <TodayListCard />
+
       <AIMotivation
         userName={user.displayName || 'champion'}
         goal={primaryGoal?.title}
         progressPercentage={primaryGoal?.progress || 0}
         consistencyScore={overallConsistency}
       />
-
-      <TodayListCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {chartData && (
