@@ -104,7 +104,7 @@ export default function WorkoutsPage() {
             
             // Grant/remove XP
             if (isCompleted !== workout.completed) {
-                transaction.update(userRef, { xp: increment(isCompleted ? 10 : -10) });
+                transaction.set(userRef, { xp: increment(isCompleted ? 10 : -10) }, { merge: true });
             }
 
             // Update history
