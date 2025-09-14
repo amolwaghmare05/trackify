@@ -13,18 +13,18 @@ import { processTasksForCharts } from '@/lib/chart-utils';
 import { TodayListCard } from '@/components/dashboard/today-list-card';
 import { AIMotivation } from '@/components/dashboard/ai-motivation';
 
+const initialChartData = {
+    weeklyProgress: { data: [], yAxisMax: 5 },
+    consistencyTrend: { daily: [], weekly: [] },
+};
+
+
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [chartData, setChartData] = useState<{
-    weeklyProgress: {
-        data: { day: string; 'Tasks Completed': number }[];
-        yAxisMax: number;
-    };
-    consistencyTrend: { daily: any[]; weekly: any[] };
-  } | null>(null);
+  const [chartData, setChartData] = useState<typeof initialChartData>(initialChartData);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,7 +52,7 @@ export default function Home() {
           userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
         });
         setTasks(userTasks);
-        setChartData(processTasksForCharts(userTasks));
+        setChartData(processTasksForCharts(userTasks) || initialChartData);
       });
 
       return () => {
@@ -62,7 +62,7 @@ export default function Home() {
     } else {
       setTasks([]);
       setGoals([]);
-      setChartData(null);
+      setChartData(initialChartData);
     }
   }, [user]);
   
@@ -81,7 +81,6 @@ export default function Home() {
   }, [goalsWithProgress]);
 
   const overallConsistency = useMemo(() => {
-    if (!chartData) return 0;
     // Use the most recent weekly consistency score as the overall score
     const weeklyScores = chartData.consistencyTrend.weekly;
     return weeklyScores.length > 0 ? weeklyScores[weeklyScores.length - 1].consistency : 0;
@@ -113,12 +112,8 @@ export default function Home() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {chartData && (
-          <>
-            <WeeklyProgressChart data={chartData.weeklyProgress} />
-            <ConsistencyTrendChart data={chartData.consistencyTrend} />
-          </>
-        )}
+        <WeeklyProgressChart data={chartData.weeklyProgress} />
+        <ConsistencyTrendChart data={chartData.consistencyTrend} />
       </div>
     </div>
   );

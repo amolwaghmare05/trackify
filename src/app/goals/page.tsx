@@ -40,19 +40,17 @@ async function completeGoal(goal: Goal) {
     }
 }
 
+const initialChartData = {
+    weeklyProgress: { data: [], yAxisMax: 5 },
+    consistencyTrend: { daily: [], weekly: [] },
+};
 
 export default function GoalsPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState<{
-    weeklyProgress: {
-        data: { day: string; 'Tasks Completed': number }[];
-        yAxisMax: number;
-    };
-    consistencyTrend: { daily: any[]; weekly: any[] };
-  } | null>(null);
+  const [chartData, setChartData] = useState<typeof initialChartData>(initialChartData);
 
 
   useEffect(() => {
@@ -76,7 +74,7 @@ export default function GoalsPage() {
           userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
         });
         setTasks(userTasks);
-        setChartData(processTasksForCharts(userTasks));
+        setChartData(processTasksForCharts(userTasks) || initialChartData);
       });
 
       return () => {
@@ -87,7 +85,7 @@ export default function GoalsPage() {
       setGoals([]);
       setTasks([]);
       setLoading(false);
-      setChartData(null);
+      setChartData(initialChartData);
     }
   }, [user]);
 
@@ -186,12 +184,10 @@ export default function GoalsPage() {
         onUpdateTask={handleUpdateTask}
         onDeleteTask={handleDeleteTask}
       />
-       {chartData && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <WeeklyProgressChart data={chartData.weeklyProgress} />
-            <ConsistencyTrendChart data={chartData.consistencyTrend} />
-        </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <WeeklyProgressChart data={chartData.weeklyProgress} />
+          <ConsistencyTrendChart data={chartData.consistencyTrend} />
+      </div>
     </div>
   );
 }
