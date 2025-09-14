@@ -12,9 +12,9 @@ import {
   isSameDay,
   max,
 } from 'date-fns';
-import type { DailyTask, Workout, DailyTaskHistory } from './types';
+import type { DailyTaskHistory, WorkoutHistory } from './types';
 
-function getHistoryDate(historyItem: DailyTaskHistory): Date {
+function getHistoryDate(historyItem: DailyTaskHistory | WorkoutHistory): Date {
     const dateField = historyItem.date;
     if (dateField instanceof Date) {
         return dateField;
@@ -110,39 +110,21 @@ export const processTasksForCharts = (history: DailyTaskHistory[]) => {
   };
 };
 
-// Kept the workout chart processing logic as is, assuming it might use a different data source or be updated later.
-export const processWorkoutsForChart = (workouts: Workout[]) => {
+export const processWorkoutsForChart = (history: WorkoutHistory[]) => {
   const now = new Date();
+  const historyMap = new Map(history.map(h => [format(getHistoryDate(h), 'yyyy-MM-dd'), h]));
   const startOfCurrentMonth = startOfMonth(now);
   const endOfCurrentMonth = endOfMonth(now);
   const daysInMonth = eachDayOfInterval({ start: startOfCurrentMonth, end: endOfCurrentMonth });
 
-  function getWorkoutDate(workout: Workout): Date | null {
-    const dateField = workout.completedAt || workout.createdAt;
-    if (!dateField) return null;
-    if (dateField instanceof Date) return dateField;
-    if ('seconds' in dateField && typeof dateField.seconds === 'number') {
-        return new Date(dateField.seconds * 1000);
-    }
-    return null;
-  }
-
   // Daily Discipline
   const dailyDiscipline = daysInMonth.map(day => {
-    const workoutsScheduled = workouts.filter(w => {
-      const creationDate = getWorkoutDate({ ...w, completedAt: w.createdAt });
-      return creationDate && creationDate <= day;
-    });
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const historyEntry = historyMap.get(dayStr);
+    const discipline = historyEntry && historyEntry.total > 0
+        ? (historyEntry.completed / historyEntry.total) * 100
+        : 0;
     
-    const workoutsCompleted = workouts.filter(w => {
-      if (!w.completed) return false;
-      const completionDate = getWorkoutDate(w);
-      return completionDate && isSameDay(completionDate, day);
-    });
-
-    const totalScheduled = workoutsScheduled.length;
-    const discipline = totalScheduled > 0 ? (workoutsCompleted.length / totalScheduled) * 100 : 0;
-
     return {
       date: format(day, 'MMM d'),
       discipline: Math.round(discipline),
@@ -154,32 +136,22 @@ export const processWorkoutsForChart = (workouts: Workout[]) => {
   const weeksInMonth = getWeeksInMonth(now, { weekStartsOn: 1 });
   const weeklyDiscipline = Array.from({ length: weeksInMonth }, (_, i) => {
     const weekNumber = i + 1;
-    
     const startOfWeekInMonth = startOfWeek(new Date(now.getFullYear(), now.getMonth(), 1 + i * 7), { weekStartsOn: 1 });
     const endOfWeekInMonth = endOfWeek(startOfWeekInMonth, { weekStartsOn: 1 });
 
-    let totalPossibleCheckIns = 0;
-    let totalCompletedCheckIns = 0;
-
+    let totalCompleted = 0;
+    let totalPossible = 0;
+    
     eachDayOfInterval({ start: startOfWeekInMonth, end: endOfWeekInMonth }).forEach(day => {
-      if (day > endOfCurrentMonth) return;
-
-      const workoutsScheduledForDay = workouts.filter(w => {
-        const creationDate = getWorkoutDate({ ...w, completedAt: w.createdAt });
-        return creationDate && creationDate <= day;
-      }).length;
-
-      const workoutsCompletedForDay = workouts.filter(w => {
-        if (!w.completed) return false;
-        const completionDate = getWorkoutDate(w);
-        return completionDate && isSameDay(completionDate, day);
-      }).length;
-
-      totalPossibleCheckIns += workoutsScheduledForDay;
-      totalCompletedCheckIns += workoutsCompletedForDay;
+        const dayStr = format(day, 'yyyy-MM-dd');
+        const historyEntry = historyMap.get(dayStr);
+        if (historyEntry) {
+            totalCompleted += historyEntry.completed;
+            totalPossible += historyEntry.total;
+        }
     });
 
-    const discipline = totalPossibleCheckIns > 0 ? (totalCompletedCheckIns / totalPossibleCheckIns) * 100 : 0;
+    const discipline = totalPossible > 0 ? (totalCompleted / totalPossible) * 100 : 0;
 
     return {
       week: `Week ${weekNumber}`,

@@ -57,6 +57,13 @@ export interface Workout {
     createdAt: Timestamp;
 }
 
+export interface WorkoutHistory {
+    id: string;
+    date: Timestamp;
+    completed: number;
+    total: number;
+}
+
 export interface UserProfile {
     uid: string;
     xp: number;

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -13,29 +14,12 @@ import { cn } from '@/lib/utils';
 interface WorkoutTrackerCardProps {
   workouts: Workout[];
   onAddWorkout: (title: string) => void;
-  onUpdateWorkout: (workoutId: string, data: Partial<Workout>) => void;
+  onUpdateWorkout: (workout: Workout, isCompleted: boolean) => void;
   onDeleteWorkout: (workoutId: string) => void;
 }
 
 export function WorkoutTrackerCard({ workouts, onAddWorkout, onUpdateWorkout, onDeleteWorkout }: WorkoutTrackerCardProps) {
   const [isAddWorkoutDialogOpen, setIsAddWorkoutDialogOpen] = useState(false);
-
-  const handleToggleWorkout = (workout: Workout) => {
-    const isCompleted = !workout.completed;
-    let newStreak = workout.streak;
-
-    if (isCompleted) {
-        newStreak = (workout.streak || 0) + 1;
-    } else {
-        newStreak = Math.max(0, (workout.streak || 0) - 1);
-    }
-
-    onUpdateWorkout(workout.id, {
-        completed: isCompleted,
-        streak: newStreak,
-        completedAt: isCompleted ? new Date() : null
-    });
-  };
 
   return (
     <>
@@ -60,7 +44,7 @@ export function WorkoutTrackerCard({ workouts, onAddWorkout, onUpdateWorkout, on
                   <Checkbox
                     id={`workout-${workout.id}`}
                     checked={workout.completed}
-                    onCheckedChange={() => handleToggleWorkout(workout)}
+                    onCheckedChange={(checked) => onUpdateWorkout(workout, !!checked)}
                   />
                   <div className="flex-1">
                     <label
