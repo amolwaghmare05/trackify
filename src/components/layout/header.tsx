@@ -25,13 +25,13 @@ function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    // Set initial time on the client
+    // Set initial time on the client to avoid hydration mismatch
     setCurrentTime(new Date());
 
-    // Update the time every minute
+    // Update the time every second
     const intervalId = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // 60000 milliseconds = 1 minute
+    }, 1000); // 1000 milliseconds = 1 second
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
