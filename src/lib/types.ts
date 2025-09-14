@@ -69,3 +69,28 @@ export interface UserProfile {
     xp: number;
     level: number;
 }
+
+// Types for Reports Page
+export interface ActivityBreakdownData {
+    activity: string;
+    xp: number;
+    name: string;
+}
+
+export interface MonthlySummary {
+    month: string;
+    consistency?: number;
+    discipline?: number;
+}
+
+export interface XpDataPoint {
+    date: string;
+    xp: number;
+}
+
+export interface ReportsPageData {
+    activityBreakdown: ActivityBreakdownData[];
+    taskConsistency: MonthlySummary[];
+    workoutDiscipline: MonthlySummary[];
+    xpGrowth: XpDataPoint[];
+}

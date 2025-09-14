@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Target as TargetIcon, Settings, User, Dumbbell, Trophy } from 'lucide-react';
+import { LayoutDashboard, Target as TargetIcon, Settings, User, Dumbbell, Trophy, BarChartHorizontal } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 import {
@@ -25,6 +25,7 @@ const navItems = [
   { href: '/goals', label: 'Goals', icon: TargetIcon },
   { href: '/workouts', label: 'Workouts', icon: Dumbbell },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
+  { href: '/reports', label: 'Reports', icon: BarChartHorizontal },
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
