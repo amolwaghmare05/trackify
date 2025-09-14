@@ -39,3 +39,9 @@ export interface Workout {
     completedAt: Timestamp | Date | null;
     createdAt: Timestamp;
 }
+
+export interface UserProfile {
+    uid: string;
+    xp: number;
+    // Add other profile fields here if needed in the future
+}

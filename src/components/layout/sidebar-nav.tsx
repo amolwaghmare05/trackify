@@ -23,6 +23,7 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/goals', label: 'Goals', icon: TargetIcon },
   { href: '/workouts', label: 'Workouts', icon: Dumbbell },
+  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 const getInitials = (name: string | null | undefined) => {
