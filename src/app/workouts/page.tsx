@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -66,13 +67,13 @@ export default function WorkoutsPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-      {chartData && <WorkoutDisciplineChart data={chartData} />}
       <WorkoutTrackerCard
         workouts={workouts}
         onAddWorkout={handleAddWorkout}
         onUpdateWorkout={handleUpdateWorkout}
         onDeleteWorkout={handleDeleteWorkout}
       />
+      {chartData && <WorkoutDisciplineChart data={chartData} />}
     </div>
   );
 }
