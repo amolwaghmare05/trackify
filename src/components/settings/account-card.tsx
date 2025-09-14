@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { getAuth, deleteUser } from 'firebase/auth';
+import { getAuth, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { doc, deleteDoc, collection, writeBatch, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -21,33 +22,33 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { ReauthDialog } from './reauth-dialog';
 
 export function AccountCard() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isReauthDialogOpen, setIsReauthDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-  const handleDeleteAccount = async () => {
+
+  const performDelete = async () => {
     if (!user) return;
 
     setIsDeleting(true);
 
     try {
+      // All Firestore data is deleted first in a batch
       const collectionsToDelete = ['goals', 'completedGoals', 'dailyTasks', 'dailyTaskHistory', 'todayTasks', 'workouts', 'workoutHistory'];
       const batch = writeBatch(db);
-
-      // Delete all sub-collections
       for (const collectionName of collectionsToDelete) {
         const q = query(collection(db, 'users', user.uid, collectionName));
         const snapshot = await getDocs(q);
         snapshot.docs.forEach((doc) => batch.delete(doc.ref));
       }
-
-      // Delete the main user document
       const userDocRef = doc(db, 'users', user.uid);
       batch.delete(userDocRef);
-
       await batch.commit();
 
       // Finally, delete the auth user
@@ -64,59 +65,74 @@ export function AccountCard() {
       router.push('/sign-up');
 
     } catch (error: any) {
+      setIsDeleting(false);
+      setIsConfirmDialogOpen(false);
       console.error('Error deleting account:', error);
       
-      let errorMessage = 'Could not delete your account. Please try again.';
       if (error.code === 'auth/requires-recent-login') {
-        errorMessage = 'This is a sensitive operation. Please sign out and sign back in before deleting your account.';
+        setIsReauthDialogOpen(true);
+      } else {
+         toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not delete your account. Please try again.',
+        });
       }
-
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: errorMessage,
-      });
-      setIsDeleting(false);
     }
   };
 
+  const handleReauthSuccess = () => {
+    setIsReauthDialogOpen(false);
+    // After successful re-authentication, show the confirmation dialog again
+    setIsConfirmDialogOpen(true); 
+  };
+
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Account</CardTitle>
-        <CardDescription>
-          Manage your account data and permanent actions.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="font-semibold text-destructive">Delete Account</h3>
-                    <p className="text-sm text-destructive/80">Permanently remove your account and all of its content.</p>
-                </div>
-                 <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={isDeleting}>Delete Account</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action is irreversible and will permanently delete your account and all associated data, including goals, tasks, workouts, and history.
-                        </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-                            {isDeleting ? 'Deleting...' : 'Delete'}
-                        </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </div>
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Account</CardTitle>
+          <CardDescription>
+            Manage your account data and permanent actions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+              <div className="flex items-center justify-between">
+                  <div>
+                      <h3 className="font-semibold text-destructive">Delete Account</h3>
+                      <p className="text-sm text-destructive/80">Permanently remove your account and all of its content.</p>
+                  </div>
+                  <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive" disabled={isDeleting}>Delete Account</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              This action is irreversible and will permanently delete your account and all associated data, including goals, tasks, workouts, and history.
+                          </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={performDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                              {isDeleting ? 'Deleting...' : 'Delete'}
+                          </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <ReauthDialog
+        isOpen={isReauthDialogOpen}
+        onOpenChange={setIsReauthDialogOpen}
+        onSuccess={handleReauthSuccess}
+      />
+    </>
   );
 }
