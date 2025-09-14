@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Provides personalized, encouraging messages and suggestions from an AI tool to help users stay motivated and get back on track with their goals.
+ * @fileOverview Provides personalized, encouraging messages and suggestions from an AI coach to help users stay motivated.
  *
  * - generateMotivation - A function that generates a personalized motivation message.
  * - GenerateMotivationInput - The input type for the generateMotivation function.
@@ -12,15 +12,15 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateMotivationInputSchema = z.object({
-  goal: z.string().describe('The specific goal the user is working towards.'),
-  progress: z.number().describe('The current progress of the user towards the goal (0-100).'),
-  feelings: z.string().describe('The user\'s current feelings or struggles related to the goal.'),
+  userName: z.string().describe("The user's display name."),
+  goal: z.string().optional().describe('The specific goal the user is working towards. Can be empty if no goal is set.'),
+  progressPercentage: z.number().describe("The user's current progress towards the goal (0-100)."),
+  consistencyScore: z.number().describe("A score representing the user's task completion consistency (0-100)."),
 });
 export type GenerateMotivationInput = z.infer<typeof GenerateMotivationInputSchema>;
 
 const GenerateMotivationOutputSchema = z.object({
-  message: z.string().describe('A personalized, encouraging message to motivate the user.'),
-  suggestion: z.string().describe('A suggestion to help the user get back on track.'),
+  message: z.string().describe('A short, personalized, encouraging message for the user.'),
 });
 export type GenerateMotivationOutput = z.infer<typeof GenerateMotivationOutputSchema>;
 
@@ -32,15 +32,23 @@ const prompt = ai.definePrompt({
   name: 'generateMotivationPrompt',
   input: {schema: GenerateMotivationInputSchema},
   output: {schema: GenerateMotivationOutputSchema},
-  prompt: `You are a motivational AI assistant designed to encourage users to achieve their goals.
+  prompt: `You are an encouraging and insightful AI coach named Triumph Track. Your goal is to provide a short, personalized motivational message to a user based on their current progress and consistency. Address the user by their name.
 
-  Based on the user's goal, their current progress, and their feelings, provide a personalized and encouraging message, along with a concrete suggestion to help them get back on track.
+Here is the user's data:
+- User Name: {{{userName}}}
+- Current Goal: {{{goal}}}
+- Goal Progress: {{{progressPercentage}}}%
+- Task Consistency Score: {{{consistencyScore}}}%
 
-  Goal: {{{goal}}}
-  Progress: {{{progress}}}%
-  Feelings: {{{feelings}}}
+Analyze the data and provide a message based on the following rules:
+1. If the user has no goal set (goal is empty or not provided), provide a general, welcoming motivational message encouraging them to set a goal to start their journey.
+2. If progress and consistency are both high (>= 75%), praise their dedication and excellent work.
+3. If consistency is high (>= 75%) but progress is low (< 50%), acknowledge their consistent effort and encourage them that this hard work is building a strong foundation that will lead to great results.
+4. If consistency is low (< 50%), provide a gentle, encouraging nudge to get back on track. Remind them that every small step counts and today is a new opportunity.
+5. In all other cases, provide a positive and forward-looking message acknowledging their current status and motivating them to keep going.
 
-  Message:`,
+Keep the message concise (1-2 sentences).
+`,
 });
 
 const generateMotivationFlow = ai.defineFlow(

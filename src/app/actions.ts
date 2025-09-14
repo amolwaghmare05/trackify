@@ -8,8 +8,7 @@ export async function getMotivationAction(input: GenerateMotivationInput): Promi
   } catch (error) {
     console.error('Error getting motivation:', error);
     return {
-      message: 'I seem to be at a loss for words right now. Please try again in a moment.',
-      suggestion: 'Maybe take a short break and come back with a fresh perspective.',
+      message: "Keep pushing forward, you're on the right track!",
     };
   }
 }
