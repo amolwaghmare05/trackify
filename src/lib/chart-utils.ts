@@ -1,3 +1,4 @@
+
 import {
   startOfWeek,
   endOfWeek,
@@ -11,11 +12,10 @@ import {
   isSameDay,
   max,
 } from 'date-fns';
-import type { DailyTask, Workout } from './types';
+import type { DailyTask, Workout, DailyTaskHistory } from './types';
 
-function getTaskDate(task: DailyTask | Workout): Date | null {
-    const dateField = task.completedAt || task.createdAt;
-    if (!dateField) return null;
+function getHistoryDate(historyItem: DailyTaskHistory): Date {
+    const dateField = historyItem.date;
     if (dateField instanceof Date) {
         return dateField;
     }
@@ -23,11 +23,14 @@ function getTaskDate(task: DailyTask | Workout): Date | null {
     if ('seconds' in dateField && typeof dateField.seconds === 'number') {
         return new Date(dateField.seconds * 1000);
     }
-    return null;
+    // Fallback for string date (though Timestamp is expected)
+    return new Date(dateField as any);
 }
 
-export const processTasksForCharts = (tasks: DailyTask[]) => {
+
+export const processTasksForCharts = (history: DailyTaskHistory[]) => {
   const now = new Date();
+  const historyMap = new Map(history.map(h => [format(getHistoryDate(h), 'yyyy-MM-dd'), h]));
 
   // --- Weekly Progress ---
   const startOfCurrentWeek = startOfWeek(now, { weekStartsOn: 1 });
@@ -35,20 +38,16 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
   const daysInWeek = eachDayOfInterval({ start: startOfCurrentWeek, end: endOfCurrentWeek });
 
   const weeklyProgressData = daysInWeek.map(day => {
-    const completedTasks = tasks.filter(task => {
-      if (!task.completed) return false;
-      const taskDate = getTaskDate(task);
-      return taskDate && isSameDay(taskDate, day);
-    });
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const historyEntry = historyMap.get(dayStr);
     return {
       day: format(day, 'EEE'),
-      'Tasks Completed': completedTasks.length,
+      'Tasks Completed': historyEntry ? historyEntry.completed : 0,
     };
   });
 
   const maxCompleted = max(weeklyProgressData.map(d => d['Tasks Completed']));
   const yAxisMax = Math.max(5, Math.ceil((maxCompleted?.valueOf() || 0) * 1.2));
-
 
   // --- Consistency Trend ---
   const startOfCurrentMonth = startOfMonth(now);
@@ -57,21 +56,11 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
 
   // Daily Consistency
   const dailyConsistency = daysInMonth.map(day => {
-    const tasksCreatedByDay = tasks.filter(task => {
-        const createdAtDate = getTaskDate({ ...task, completedAt: task.createdAt });
-        return createdAtDate && createdAtDate <= day;
-    });
-
-    const uniqueTaskTitles = [...new Set(tasksCreatedByDay.map(t => t.title))];
-
-    const completedTasksForDay = tasks.filter(task => {
-        if (!task.completed) return false;
-        const taskDate = getTaskDate(task);
-        return taskDate && isSameDay(taskDate, day);
-    });
-    
-    const totalScheduled = uniqueTaskTitles.length;
-    const consistency = totalScheduled > 0 ? (completedTasksForDay.length / totalScheduled) * 100 : 0;
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const historyEntry = historyMap.get(dayStr);
+    const consistency = historyEntry && historyEntry.total > 0
+        ? (historyEntry.completed / historyEntry.total) * 100
+        : 0;
     
     return {
         date: format(day, 'MMM d'),
@@ -84,25 +73,24 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
   const weeksInMonth = getWeeksInMonth(now, { weekStartsOn: 1 });
   const weeklyConsistency = Array.from({ length: weeksInMonth }, (_, i) => {
     const weekNumber = i + 1;
-    
     const startOfWeekInMonth = startOfWeek(new Date(now.getFullYear(), now.getMonth(), 1 + i * 7), { weekStartsOn: 1 });
     const endOfWeekInMonth = endOfWeek(startOfWeekInMonth, { weekStartsOn: 1 });
 
-    const tasksCreatedByWeek = tasks.filter(task => {
-        const createdAtDate = getTaskDate({ ...task, completedAt: task.createdAt });
-        return createdAtDate && createdAtDate <= endOfWeekInMonth;
-    });
+    const daysInThisWeek = eachDayOfInterval({ start: startOfWeekInMonth, end: endOfWeekInMonth });
     
-    const uniqueTaskTitlesInWeek = [...new Set(tasksCreatedByWeek.map(t => t.title))];
+    let totalCompleted = 0;
+    let totalPossible = 0;
 
-    const completedTasksInWeek = tasks.filter(task => {
-        if (!task.completed) return false;
-        const taskDate = getTaskDate(task);
-        return taskDate && isWithinInterval(taskDate, { start: startOfWeekInMonth, end: endOfWeekInMonth });
+    daysInThisWeek.forEach(day => {
+        const dayStr = format(day, 'yyyy-MM-dd');
+        const historyEntry = historyMap.get(dayStr);
+        if (historyEntry) {
+            totalCompleted += historyEntry.completed;
+            totalPossible += historyEntry.total;
+        }
     });
-    
-    const totalScheduled = uniqueTaskTitlesInWeek.length * 7;
-    const consistency = totalScheduled > 0 ? (completedTasksInWeek.length / totalScheduled) * 100 : 0;
+
+    const consistency = totalPossible > 0 ? (totalCompleted / totalPossible) * 100 : 0;
     
     return {
       week: `Week ${weekNumber}`,
@@ -122,25 +110,33 @@ export const processTasksForCharts = (tasks: DailyTask[]) => {
   };
 };
 
-
+// Kept the workout chart processing logic as is, assuming it might use a different data source or be updated later.
 export const processWorkoutsForChart = (workouts: Workout[]) => {
   const now = new Date();
   const startOfCurrentMonth = startOfMonth(now);
   const endOfCurrentMonth = endOfMonth(now);
   const daysInMonth = eachDayOfInterval({ start: startOfCurrentMonth, end: endOfCurrentMonth });
 
+  function getWorkoutDate(workout: Workout): Date | null {
+    const dateField = workout.completedAt || workout.createdAt;
+    if (!dateField) return null;
+    if (dateField instanceof Date) return dateField;
+    if ('seconds' in dateField && typeof dateField.seconds === 'number') {
+        return new Date(dateField.seconds * 1000);
+    }
+    return null;
+  }
+
   // Daily Discipline
   const dailyDiscipline = daysInMonth.map(day => {
-    // Find all workouts that existed on or before this day
     const workoutsScheduled = workouts.filter(w => {
-      const creationDate = getTaskDate({ ...w, completedAt: w.createdAt });
+      const creationDate = getWorkoutDate({ ...w, completedAt: w.createdAt });
       return creationDate && creationDate <= day;
     });
     
-    // Find all workouts completed on this specific day
     const workoutsCompleted = workouts.filter(w => {
       if (!w.completed) return false;
-      const completionDate = getTaskDate(w);
+      const completionDate = getWorkoutDate(w);
       return completionDate && isSameDay(completionDate, day);
     });
 
@@ -169,13 +165,13 @@ export const processWorkoutsForChart = (workouts: Workout[]) => {
       if (day > endOfCurrentMonth) return;
 
       const workoutsScheduledForDay = workouts.filter(w => {
-        const creationDate = getTaskDate({ ...w, completedAt: w.createdAt });
+        const creationDate = getWorkoutDate({ ...w, completedAt: w.createdAt });
         return creationDate && creationDate <= day;
       }).length;
 
       const workoutsCompletedForDay = workouts.filter(w => {
         if (!w.completed) return false;
-        const completionDate = getTaskDate(w);
+        const completionDate = getWorkoutDate(w);
         return completionDate && isSameDay(completionDate, day);
       }).length;
 

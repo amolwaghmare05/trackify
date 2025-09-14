@@ -2,15 +2,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-import type { Goal, DailyTask } from '@/lib/types';
+import type { Goal, DailyTask, DailyTaskHistory } from '@/lib/types';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
 import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
 import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
 import { processTasksForCharts } from '@/lib/chart-utils';
+import { format } from 'date-fns';
 
 async function completeGoal(goal: Goal) {
     if (!goal || !goal.userId || !goal.id) return;
@@ -21,7 +22,6 @@ async function completeGoal(goal: Goal) {
     try {
         await runTransaction(db, async (transaction) => {
             const originalDoc = await transaction.get(originalGoalRef);
-            // Only proceed if the original goal still exists
             if (!originalDoc.exists()) {
                 return;
             }
@@ -44,16 +44,13 @@ export default function GoalsPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
+  const [history, setHistory] = useState<DailyTaskHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState<{
-    weeklyProgress: { data: any[]; yAxisMax: number; };
-    consistencyTrend: { daily: any[]; weekly: any[]; };
-  } | null>(null);
-
+  
+  const chartData = useMemo(() => processTasksForCharts(history), [history]);
 
   useEffect(() => {
     if (user) {
-      // Fetch Goals
       const goalsQuery = query(collection(db, 'goals'), where('userId', '==', user.uid));
       const unsubscribeGoals = onSnapshot(goalsQuery, (querySnapshot) => {
         const userGoals: Goal[] = [];
@@ -61,10 +58,9 @@ export default function GoalsPage() {
           userGoals.push({ id: doc.id, ...doc.data() } as Goal);
         });
         setGoals(userGoals);
-        setLoading(false);
+        if(loading) setLoading(false);
       });
 
-      // Fetch Daily Tasks
       const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
       const unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
         const userTasks: DailyTask[] = [];
@@ -72,18 +68,27 @@ export default function GoalsPage() {
           userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
         });
         setTasks(userTasks);
-        setChartData(processTasksForCharts(userTasks));
+      });
+
+      const historyQuery = query(collection(db, 'users', user.uid, 'dailyTaskHistory'));
+      const unsubscribeHistory = onSnapshot(historyQuery, (querySnapshot) => {
+        const userHistory: DailyTaskHistory[] = [];
+        querySnapshot.forEach((doc) => {
+          userHistory.push({ id: doc.id, ...doc.data() } as DailyTaskHistory);
+        });
+        setHistory(userHistory);
       });
 
       return () => {
         unsubscribeGoals();
         unsubscribeTasks();
+        unsubscribeHistory();
       };
     } else {
       setGoals([]);
       setTasks([]);
+      setHistory([]);
       setLoading(false);
-      setChartData(null);
     }
   }, [user]);
 
@@ -122,16 +127,13 @@ export default function GoalsPage() {
 
   const handleDeleteGoal = async (goalId: string) => {
     const batch = writeBatch(db);
-
-    // Delete the goal
     const goalRef = doc(db, 'goals', goalId);
     batch.delete(goalRef);
-
-    // Find and delete all associated tasks
-    const tasksToDelete = tasks.filter(task => task.goalId === goalId);
-    tasksToDelete.forEach(task => {
-        const taskRef = doc(db, 'dailyTasks', task.id);
-        batch.delete(taskRef);
+    
+    const tasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user?.uid), where('goalId', '==', goalId));
+    const tasksSnapshot = await getDocs(tasksQuery);
+    tasksSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
     });
 
     await batch.commit();
@@ -150,41 +152,85 @@ export default function GoalsPage() {
   };
 
   const handleUpdateTask = async (task: DailyTask, isCompleted: boolean) => {
+    if (!user) return;
+
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const historyDocRef = doc(db, 'users', user.uid, 'dailyTaskHistory', todayStr);
     const taskRef = doc(db, 'dailyTasks', task.id);
     const goalRef = doc(db, 'goals', task.goalId);
 
-    const batch = writeBatch(db);
+    try {
+        await runTransaction(db, async (transaction) => {
+            const taskDoc = await transaction.get(taskRef);
+            if (!taskDoc.exists()) return;
 
-    let newStreak = task.streak || 0;
-    if (isCompleted) {
-      newStreak++;
-    } else {
-      newStreak = Math.max(0, newStreak - 1);
+            // Update task
+            let newStreak = task.streak || 0;
+            if (isCompleted && !task.completed) {
+                newStreak++;
+            } else if (!isCompleted && task.completed) {
+                newStreak = Math.max(0, newStreak - 1);
+            }
+            transaction.update(taskRef, { 
+                completed: isCompleted,
+                streak: newStreak,
+                completedAt: isCompleted ? new Date() : null 
+            });
+
+            // Update goal
+            if (isCompleted !== task.completed) {
+              transaction.update(goalRef, {
+                  completedDays: increment(isCompleted ? 1 : -1)
+              });
+            }
+
+            // Update history
+            const allTasksQuery = query(collection(db, 'dailyTasks'), where('userId', '==', user.uid));
+            const allTasksSnapshot = await getDocs(allTasksQuery);
+            const totalTasks = allTasksSnapshot.size;
+            const completedTasks = allTasksSnapshot.docs.filter(doc => {
+              // Simulate the update for the current task
+              if (doc.id === task.id) return isCompleted;
+              return doc.data().completed;
+            }).length;
+
+            transaction.set(historyDocRef, {
+                date: Timestamp.fromDate(new Date()),
+                completed: completedTasks,
+                total: totalTasks,
+            }, { merge: true });
+        });
+    } catch (e) {
+        console.error("Transaction failed: ", e);
     }
-    
-    batch.update(taskRef, { 
-      completed: isCompleted,
-      streak: newStreak,
-      completedAt: isCompleted ? new Date() : null 
-    });
-
-    batch.update(goalRef, {
-      completedDays: increment(isCompleted ? 1 : -1)
-    });
-
-    await batch.commit();
   };
   
   const handleDeleteTask = async (taskId: string) => {
-    // Before deleting, check if the task was completed to decrement the goal's completedDays
+    if (!user) return;
+
     const taskToDelete = tasks.find(t => t.id === taskId);
-    if (taskToDelete && taskToDelete.completed) {
-      const goalRef = doc(db, 'goals', taskToDelete.goalId);
-      await updateDoc(goalRef, {
-        completedDays: increment(-1)
-      });
+    const batch = writeBatch(db);
+
+    if (taskToDelete) {
+        if (taskToDelete.completed) {
+            const goalRef = doc(db, 'goals', taskToDelete.goalId);
+            batch.update(goalRef, { completedDays: increment(-1) });
+        }
+        const taskRef = doc(db, 'dailyTasks', taskId);
+        batch.delete(taskRef);
     }
-    await deleteDoc(doc(db, 'dailyTasks', taskId));
+
+    await batch.commit();
+
+    // After deleting, we need to update today's history
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const historyDocRef = doc(db, 'users', user.uid, 'dailyTaskHistory', todayStr);
+    const remainingTasks = tasks.filter(t => t.id !== taskId);
+    
+    await updateDoc(historyDocRef, {
+        total: remainingTasks.length,
+        completed: remainingTasks.filter(t => t.completed).length
+    });
   };
 
 
@@ -208,17 +254,8 @@ export default function GoalsPage() {
         onDeleteTask={handleDeleteTask}
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {chartData ? (
-          <>
-            <WeeklyProgressChart data={chartData.weeklyProgress} />
-            <ConsistencyTrendChart data={chartData.consistencyTrend} />
-          </>
-        ) : (
-          <>
-            <WeeklyProgressChart data={{ data: [], yAxisMax: 5 }} />
-            <ConsistencyTrendChart data={{ daily: [], weekly: [] }} />
-          </>
-        )}
+        <WeeklyProgressChart data={chartData.weeklyProgress} />
+        <ConsistencyTrendChart data={chartData.consistencyTrend} />
       </div>
     </div>
   );

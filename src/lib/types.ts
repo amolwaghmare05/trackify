@@ -31,6 +31,13 @@ export interface DailyTask {
     createdAt: Timestamp;
 }
 
+export interface DailyTaskHistory {
+    id: string;
+    date: Timestamp;
+    completed: number;
+    total: number;
+}
+
 export interface TodayTask {
     id: string;
     userId: string;
