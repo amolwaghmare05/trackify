@@ -43,8 +43,8 @@ export function AddTodayTaskDialog({ isOpen, onOpenChange, onAddTask }: AddToday
     },
   });
 
-  const onSubmit = async (data: TaskFormValues) => {
-    await onAddTask(data.title);
+  const onSubmit = (data: TaskFormValues) => {
+    onAddTask(data.title);
     form.reset();
     onOpenChange(false);
   };
