@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment, getDocs, Timestamp, where } from 'firebase/firestore';
+import { collection, query, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment, getDocs, Timestamp, where, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import type { Goal, DailyTask, DailyTaskHistory } from '@/lib/types';
@@ -163,9 +163,10 @@ export default function GoalsPage() {
     await batch.commit();
   };
 
-  const handleAddTask = (data: { title: string; goalId: string }) => {
+  const handleAddTask = async (data: { title: string; goalId: string }) => {
     if (!user) return;
-    addDoc(collection(db, 'users', user.uid, 'dailyTasks'), {
+    
+    await addDoc(collection(db, 'users', user.uid, 'dailyTasks'), {
       ...data,
       userId: user.uid,
       completed: false,
@@ -173,6 +174,14 @@ export default function GoalsPage() {
       completedAt: null,
       createdAt: new Date(),
     });
+
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const historyDocRef = doc(db, 'users', user.uid, 'dailyTaskHistory', todayStr);
+
+    await setDoc(historyDocRef, {
+        date: Timestamp.fromDate(new Date()),
+        total: increment(1),
+    }, { merge: true });
   };
 
   const handleUpdateTask = async (task: DailyTask, isCompleted: boolean) => {
