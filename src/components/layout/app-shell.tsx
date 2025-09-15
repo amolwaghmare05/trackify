@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -22,7 +23,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarNav />
         </Sidebar>
-        <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out group-data-[sidebar-open=true]/sidebar-wrapper:ml-[var(--sidebar-width)]">
+        <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out md:group-data-[sidebar-open=true]/sidebar-wrapper:ml-[var(--sidebar-width)] md:group-data-[sidebar-open=false]/sidebar-wrapper:ml-[var(--sidebar-width-collapsed)]">
           <Header />
           <main className="flex-1">
             {children}

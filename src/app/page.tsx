@@ -83,8 +83,8 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="mb-4 text-left">
+    <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-8">
+      <div className="text-left">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Welcome back, {user.displayName}!</h1>
         <p className="text-muted-foreground">Here's a look at your progress and today's tasks.</p>
       </div>

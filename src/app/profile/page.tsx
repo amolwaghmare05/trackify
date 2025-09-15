@@ -96,7 +96,7 @@ export default function ProfilePage() {
   const userLevel = calculateLevel(userProfile?.xp ?? 0);
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
             <UserInformationCard 

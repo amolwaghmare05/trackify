@@ -73,7 +73,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-4 sm:p-6 md:p-8">
        <div className="mb-8 flex items-center gap-3">
         <Trophy className="h-8 w-8 text-primary" />
         <div>
