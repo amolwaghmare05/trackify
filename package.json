@@ -47,7 +47,7 @@
     "firebase-functions": "^6.4.0",
     "genkit": "^1.14.1",
     "lucide-react": "^0.475.0",
-  "next": "^14.2.4",
+  "next": "^15.5.3",
     "next-themes": "^0.3.0",
     "patch-package": "^8.0.0",
   "react": "^18.2.0",
