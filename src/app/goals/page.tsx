@@ -18,14 +18,16 @@ async function completeGoal(goal: Goal) {
 
     const completedGoalRef = doc(collection(db, 'users', goal.userId, 'completedGoals'));
     const originalGoalRef = doc(db, 'users', goal.userId, 'goals', goal.id);
+    const tasksQuery = query(collection(db, 'users', goal.userId, 'dailyTasks'), where('goalId', '==', goal.id));
 
     try {
         await runTransaction(db, async (transaction) => {
             const originalDoc = await transaction.get(originalGoalRef);
             if (!originalDoc.exists()) {
-                return;
+                return; // Goal already completed/deleted
             }
-
+            
+            // 1. Set the completed goal
             transaction.set(completedGoalRef, {
                 userId: goal.userId,
                 title: goal.title,
@@ -33,12 +35,21 @@ async function completeGoal(goal: Goal) {
                 completedAt: new Date(),
                 originalCreatedAt: goal.createdAt,
             });
+            
+            // 2. Delete the original goal
             transaction.delete(originalGoalRef);
+
+            // 3. Find and delete associated tasks
+            const tasksSnapshot = await getDocs(tasksQuery);
+            tasksSnapshot.forEach((taskDoc) => {
+                transaction.delete(doc(db, 'users', goal.userId, 'dailyTasks', taskDoc.id));
+            });
         });
     } catch (e) {
         console.error("Transaction failed: ", e);
     }
 }
+
 
 export default function GoalsPage() {
   const { user } = useAuth();
