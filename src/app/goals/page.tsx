@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, addDoc, doc, updateDoc, deleteDoc, writeBatch, runTransaction, increment, getDocs, Timestamp, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import type { Goal, DailyTask, DailyTaskHistory } from '@/lib/types';
@@ -116,7 +117,7 @@ export default function GoalsPage() {
     
     const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'), where('goalId', '==', goalId));
     const tasksSnapshot = await getDocs(tasksQuery);
-    tasksSnapshot.forEach(doc => {
+    tasksSnapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
 
