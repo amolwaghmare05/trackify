@@ -2,32 +2,10 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { Header } from '@/components/layout/header';
-import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { AppLayout } from './app-layout';
 
 const NO_LAYOUT_ROUTES = ['/sign-in', '/sign-up'];
-
-function MainContent({ children }: { children: React.Node }) {
-  const { open } = useSidebar();
-
-  return (
-    <div
-      className={cn(
-        'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-        'md:group-data-[sidebar-open=true]:pl-[var(--sidebar-width)]',
-        'md:group-data-[sidebar-open=false]:pl-[var(--sidebar-width-collapsed)]'
-      )}
-    >
-      <Header />
-      <main className="flex-1 bg-background text-foreground">
-        {children}
-      </main>
-    </div>
-  );
-}
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -43,21 +21,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Render a loader or null on the server and initial client render
+  // Render a loader or null on the server and initial client render to avoid hydration mismatch
   if (!mounted) {
-    return null; 
+    return null;
   }
 
   return (
-    <SidebarProvider>
-      <div className="relative flex min-h-screen">
-        <Sidebar>
-          <SidebarNav />
-        </Sidebar>
-        <MainContent>
-          {children}
-        </MainContent>
-      </div>
-    </SidebarProvider>
+    <AppLayout>
+        {children}
+    </AppLayout>
   );
 }
