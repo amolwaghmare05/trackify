@@ -12,8 +12,9 @@ import { format } from 'date-fns';
 import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
 import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
 import { processTasksForCharts } from '@/lib/chart-utils';
+import { useToast } from '@/hooks/use-toast';
 
-async function completeGoal(goal: Goal) {
+async function completeGoal(goal: Goal, toast: ReturnType<typeof useToast>['toast']) {
     if (!goal || !goal.userId || !goal.id) return;
 
     const completedGoalRef = doc(collection(db, 'users', goal.userId, 'completedGoals'));
@@ -45,6 +46,10 @@ async function completeGoal(goal: Goal) {
                 transaction.delete(doc(db, 'users', goal.userId, 'dailyTasks', taskDoc.id));
             });
         });
+        toast({
+            title: 'Goal Completed!',
+            description: `"${goal.title}" is now in your achievements.`,
+        });
     } catch (e) {
         console.error("Transaction failed: ", e);
     }
@@ -53,6 +58,7 @@ async function completeGoal(goal: Goal) {
 
 export default function GoalsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [history, setHistory] = useState<DailyTaskHistory[]>([]);
@@ -115,10 +121,10 @@ export default function GoalsPage() {
   useEffect(() => {
     goalsWithProgress.forEach(goal => {
       if (goal.progress >= 100) {
-        completeGoal(goal);
+        completeGoal(goal, toast);
       }
     });
-  }, [goalsWithProgress]);
+  }, [goalsWithProgress, toast]);
 
 
   const handleAddGoal = async (data: { title: string; targetDays: number }) => {
