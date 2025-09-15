@@ -5,16 +5,14 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   collection,
   query,
-  where,
   onSnapshot,
   addDoc,
   doc,
   updateDoc,
   deleteDoc,
-  Timestamp,
-  orderBy,
   runTransaction,
   increment,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -36,18 +34,9 @@ export function TodayListCard() {
 
   useEffect(() => {
     if (user) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      const startOfToday = Timestamp.fromDate(today);
-      const startOfTomorrow = Timestamp.fromDate(tomorrow);
-
+      // Query all tasks, ordered by creation date.
       const tasksQuery = query(
         collection(db, 'users', user.uid, 'todayTasks'),
-        where('createdAt', '>=', startOfToday),
-        where('createdAt', '<', startOfTomorrow),
         orderBy('createdAt', 'desc')
       );
 
@@ -69,8 +58,13 @@ export function TodayListCard() {
 
   const sortedTasks = useMemo(() => {
     return tasks.slice().sort((a, b) => {
+      // Sort by completion status first (incomplete tasks first)
+      if (a.completed && !b.completed) return 1;
+      if (!a.completed && b.completed) return -1;
+      // Then sort by primary status
       if (a.isPrimary && !b.isPrimary) return -1;
       if (!a.isPrimary && b.isPrimary) return 1;
+      // Finally, by creation date (already handled by query)
       return 0;
     });
   }, [tasks]);
