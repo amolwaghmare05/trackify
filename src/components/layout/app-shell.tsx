@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const NO_LAYOUT_ROUTES = ['/sign-in', '/sign-up'];
@@ -22,7 +21,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
       )}
     >
       <Header />
-      <main className="flex-1 p-4 sm:p-6 md:p-8">
+      <main className="flex-1 bg-background text-foreground">
         {children}
       </main>
     </div>
