@@ -27,12 +27,12 @@ export function SidebarNav() {
 
   return (
     <>
-    <SidebarHeader className="border-b border-sidebar-border p-4">
+    <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
             <Target className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold font-headline text-sidebar-foreground">Trackify</h1>
-              <p className="text-xs text-sidebar-foreground/70">Your Goal Companion</p>
+              <h1 className="text-xl font-bold font-headline">Trackify</h1>
+              <p className="text-xs text-muted-foreground">Your Goal Companion</p>
             </div>
         </div>
     </SidebarHeader>
