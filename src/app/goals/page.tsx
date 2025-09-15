@@ -9,6 +9,9 @@ import type { Goal, DailyTask, DailyTaskHistory } from '@/lib/types';
 import { MyGoalsList } from '@/components/goals/my-goals-list';
 import { DailyTaskList } from '@/components/goals/daily-task-list';
 import { format } from 'date-fns';
+import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
+import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
+import { processTasksForCharts } from '@/lib/chart-utils';
 
 async function completeGoal(goal: Goal) {
     if (!goal || !goal.userId || !goal.id) return;
@@ -41,7 +44,10 @@ export default function GoalsPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
+  const [history, setHistory] = useState<DailyTaskHistory[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const chartData = useMemo(() => processTasksForCharts(history), [history]);
 
   useEffect(() => {
     if (user) {
@@ -64,13 +70,25 @@ export default function GoalsPage() {
         setTasks(userTasks);
       });
 
+      const historyQuery = query(collection(db, 'users', user.uid, 'dailyTaskHistory'));
+      const unsubscribeHistory = onSnapshot(historyQuery, (querySnapshot) => {
+        const userHistory: DailyTaskHistory[] = [];
+        querySnapshot.forEach((doc) => {
+          userHistory.push({ id: doc.id, ...doc.data() } as DailyTaskHistory);
+        });
+        setHistory(userHistory);
+      });
+
+
       return () => {
         unsubscribeGoals();
         unsubscribeTasks();
+        unsubscribeHistory();
       };
     } else {
       setGoals([]);
       setTasks([]);
+      setHistory([]);
       setLoading(false);
     }
   }, [user, loading]);
@@ -225,23 +243,29 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-1">
-        <MyGoalsList
-          goals={goalsWithProgress}
-          onAddGoal={handleAddGoal}
-          onUpdateGoal={handleUpdateGoal}
-          onDeleteGoal={handleDeleteGoal}
-        />
-      </div>
-      <div className="lg:col-span-2">
-        <DailyTaskList
-            tasks={tasks}
+    <div className="container mx-auto py-8 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-1">
+          <MyGoalsList
             goals={goalsWithProgress}
-            onAddTask={handleAddTask}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-        />
+            onAddGoal={handleAddGoal}
+            onUpdateGoal={handleUpdateGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <DailyTaskList
+              tasks={tasks}
+              goals={goalsWithProgress}
+              onAddTask={handleAddTask}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={handleDeleteTask}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <WeeklyProgressChart data={chartData.weeklyProgress} />
+        <ConsistencyTrendChart data={chartData.consistencyTrend} />
       </div>
     </div>
   );
