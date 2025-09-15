@@ -1,11 +1,13 @@
 
-import { format, getMonth, getYear, startOfDay } from 'date-fns';
-import type { DailyTaskHistory, WorkoutHistory, CompletedGoal, ActivityBreakdownData, MonthlySummary } from './types';
+import { format, getMonth, getYear, startOfDay, eachDayOfInterval, compareAsc, addDays } from 'date-fns';
+import type { DailyTaskHistory, WorkoutHistory, CompletedGoal, ActivityBreakdownData, MonthlySummary, XpDataPoint } from './types';
 
 // XP constants
-const XP_PER_WORKOUT = 10;
-const XP_PER_TASK = 5;
-const XP_PER_GOAL = 50;
+const XP_PER_WORKOUT = 5;
+const XP_PER_GOAL_TASK = 5;
+const XP_PER_TODAY_TASK = 2;
+const XP_PER_GOAL_COMPLETION = 30;
+
 
 function getHistoryDate(historyItem: DailyTaskHistory | WorkoutHistory | CompletedGoal): Date {
     const dateField = (historyItem as any).date || (historyItem as any).completedAt;
@@ -25,9 +27,9 @@ export const processHistoryForReports = (
     completedGoals: CompletedGoal[]
 ) => {
     // 1. Activity Breakdown
-    const totalTaskXp = taskHistory.reduce((sum, item) => sum + item.completed, 0) * XP_PER_TASK;
-    const totalWorkoutXp = workoutHistory.reduce((sum, item) => sum + item.completed, 0) * XP_PER_WORKOUT;
-    const totalGoalXp = completedGoals.length * XP_PER_GOAL;
+    const totalTaskXp = taskHistory.reduce((sum, item) => sum + (item.completed || 0), 0) * XP_PER_GOAL_TASK;
+    const totalWorkoutXp = workoutHistory.reduce((sum, item) => sum + (item.completed || 0), 0) * XP_PER_WORKOUT;
+    const totalGoalXp = completedGoals.length * XP_PER_GOAL_COMPLETION;
 
     const activityBreakdown: ActivityBreakdownData[] = [
         { activity: 'Daily Tasks', xp: totalTaskXp, name: `${(totalTaskXp).toLocaleString()} XP` },
@@ -62,11 +64,42 @@ export const processHistoryForReports = (
     
     const taskConsistency: MonthlySummary[] = taskConsistencyMonthly.map(d => ({ month: d.month, consistency: d.percentage }));
     const workoutDiscipline: MonthlySummary[] = workoutDisciplineMonthly.map(d => ({ month: d.month, discipline: d.percentage }));
+    
+    // 4. XP Growth
+    const allEvents = [
+        ...taskHistory.map(h => ({ date: getHistoryDate(h), xp: (h.completed || 0) * XP_PER_GOAL_TASK })),
+        ...workoutHistory.map(h => ({ date: getHistoryDate(h), xp: (h.completed || 0) * XP_PER_WORKOUT })),
+        ...completedGoals.map(g => ({ date: getHistoryDate(g), xp: XP_PER_GOAL_COMPLETION }))
+    ].sort((a, b) => compareAsc(a.date, b.date));
+
+    let cumulativeXp = 0;
+    const xpByDate: { [key: string]: number } = {};
+
+    allEvents.forEach(event => {
+        const dateKey = format(startOfDay(event.date), 'yyyy-MM-dd');
+        xpByDate[dateKey] = (xpByDate[dateKey] || 0) + event.xp;
+    });
+
+    const xpGrowth: XpDataPoint[] = [];
+    if (allEvents.length > 0) {
+        const firstDate = startOfDay(allEvents[0].date);
+        const lastDate = startOfDay(new Date());
+        
+        for (let d = firstDate; d <= lastDate; d = addDays(d, 1)) {
+            const dateKey = format(d, 'yyyy-MM-dd');
+            cumulativeXp += xpByDate[dateKey] || 0;
+            xpGrowth.push({
+                date: format(d, 'MMM d'),
+                xp: cumulativeXp
+            });
+        }
+    }
 
 
     return {
         activityBreakdown,
         taskConsistency,
         workoutDiscipline,
+        xpGrowth,
     };
 };
