@@ -52,7 +52,7 @@ export function AIMotivation({ userName, goal, progressPercentage, consistencySc
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Bot className="h-6 w-6 text-foreground" />
+                <Bot className="h-6 w-6 text-primary" />
             </div>
           </div>
           <div className="flex-1 pt-1">
