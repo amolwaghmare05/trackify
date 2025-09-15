@@ -63,6 +63,7 @@ export function ReauthDialog({ isOpen, onOpenChange, onSuccess }: ReauthDialogPr
       const credential = EmailAuthProvider.credential(user.email, data.password);
       if(auth.currentUser) {
         await reauthenticateWithCredential(auth.currentUser, credential);
+        handleOpenChange(false); // Close dialog on success
         onSuccess();
       }
     } catch (error: any) {

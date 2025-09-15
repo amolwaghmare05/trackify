@@ -36,6 +36,7 @@ export function AccountCard() {
     if (!user) return;
 
     setIsDeleting(true);
+    setIsConfirmDialogOpen(false); // Close the confirmation dialog
 
     try {
       const collectionsToDelete = ['goals', 'completedGoals', 'dailyTasks', 'dailyTaskHistory', 'todayTasks', 'workouts', 'workoutHistory'];
@@ -64,8 +65,6 @@ export function AccountCard() {
       router.push('/sign-up');
 
     } catch (error: any) {
-      setIsDeleting(false);
-      setIsConfirmDialogOpen(false);
       console.error('Error deleting account:', error);
       
       if (error.code === 'auth/requires-recent-login') {
@@ -77,12 +76,15 @@ export function AccountCard() {
           description: 'Could not delete your account. Please try again.',
         });
       }
+    } finally {
+        setIsDeleting(false);
     }
   };
 
   const handleReauthSuccess = () => {
     setIsReauthDialogOpen(false);
-    setIsConfirmDialogOpen(true); 
+    // Immediately retry the delete operation after successful re-authentication
+    performDelete(); 
   };
 
 
