@@ -1,3 +1,6 @@
+
+'use client';
+
 import type { Metadata } from 'next';
 import { Inter, PT_Sans } from 'next/font/google';
 import './globals.css';
@@ -13,10 +16,10 @@ const ptSans = PT_Sans({
   variable: '--font-pt-sans',
 });
 
-export const metadata: Metadata = {
-  title: 'Triumph Track',
-  description: 'Your personal goal tracker to achieve greatness.',
-};
+// export const metadata: Metadata = {
+//   title: 'Triumph Track',
+//   description: 'Your personal goal tracker to achieve greatness.',
+// };
 
 export default function RootLayout({
   children,
@@ -25,6 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>Triumph Track</title>
+        <meta name="description" content="Your personal goal tracker to achieve greatness." />
+      </head>
       <body className={`${inter.variable} ${ptSans.variable} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
