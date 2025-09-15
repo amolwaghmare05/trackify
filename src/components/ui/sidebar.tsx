@@ -119,7 +119,7 @@ const Sidebar = React.forwardRef<
     <aside
       ref={ref}
       className={cn(
-        'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-card text-card-foreground border-r transition-all duration-300 ease-in-out',
+        'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-background text-card-foreground border-r transition-all duration-300 ease-in-out',
         open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]',
         className
       )}
