@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -106,7 +107,7 @@ const Sidebar = React.forwardRef<
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
-          className="w-[18rem] bg-secondary p-0 text-secondary-foreground [&>button]:hidden"
+          className="w-[18rem] bg-card p-0 text-card-foreground [&>button]:hidden"
           side={side}
         >
           <div className="flex h-full w-full flex-col">{children}</div>
@@ -119,7 +120,7 @@ const Sidebar = React.forwardRef<
     <aside
       ref={ref}
       className={cn(
-        'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-secondary text-secondary-foreground border-r transition-all duration-300 ease-in-out',
+        'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-card text-card-foreground border-r transition-all duration-300 ease-in-out',
         open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]',
         className
       )}
@@ -173,11 +174,11 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li
 SidebarMenuItem.displayName = 'SidebarMenuItem';
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-ring transition-[width,height,padding] hover:bg-background/50 hover:text-foreground focus-visible:ring-2 active:bg-background/50 active:text-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-background data-[active=true]:font-medium data-[active=true]:text-foreground',
+  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-ring transition-[width,height,padding] hover:bg-muted focus-visible:ring-2 active:bg-muted disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-primary',
   {
     variants: {
       variant: {
-        default: 'hover:bg-background/50 hover:text-foreground',
+        default: 'hover:bg-muted',
       },
       size: {
         default: 'h-8 text-sm',
