@@ -1,18 +1,17 @@
 
 'use client';
 
-import { Sidebar, SidebarProvider } from '@/components/ui/sidebar';
+import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
 
 function MainContent({ children }: { children: React.ReactNode }) {
-  const { open } = useSidebar();
   return (
     <div
       className={cn(
         'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-        open ? 'md:pl-[var(--sidebar-width)]' : 'md:pl-[var(--sidebar-width-collapsed)]'
+        'md:group-data-[sidebar-open=true]:pl-[var(--sidebar-width)] md:group-data-[sidebar-open=false]:pl-[var(--sidebar-width-collapsed)]'
       )}
     >
       <Header />
