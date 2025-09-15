@@ -14,7 +14,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Trackify',
+  title: 'Triumph Track',
   description: 'Your personal goal tracker to achieve greatness.',
 };
 
