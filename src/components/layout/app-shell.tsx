@@ -15,15 +15,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return null; 
+  }
+
   const showLayout = !NO_LAYOUT_ROUTES.includes(pathname);
 
   if (!showLayout) {
     return <>{children}</>;
-  }
-
-  // Render a loader or null on the server and initial client render to avoid hydration mismatch
-  if (!mounted) {
-    return null;
   }
 
   return (

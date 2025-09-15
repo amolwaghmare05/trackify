@@ -28,7 +28,7 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
 
-function useSidebar() {
+export function useSidebar() {
   const context = React.useContext(SidebarContext);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider.');
@@ -46,13 +46,14 @@ const SidebarProvider = React.forwardRef<
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, ...props }, ref) => {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
-  const [_open, _setOpen] = React.useState(false); // Default to closed
+  const [_open, _setOpen] = React.useState(false); 
   const open = openProp ?? _open;
 
-  // Open sidebar on desktop view after mount
   React.useEffect(() => {
     if (!isMobile) {
       _setOpen(defaultOpen);
+    } else {
+      _setOpen(false);
     }
   }, [isMobile, defaultOpen]);
 
@@ -111,15 +112,6 @@ const Sidebar = React.forwardRef<
 >(({ side = 'left', className, children, ...props }, ref) => {
   const { isMobile, open, openMobile, setOpenMobile } = useSidebar();
   
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
@@ -253,5 +245,4 @@ export {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  useSidebar,
 };
