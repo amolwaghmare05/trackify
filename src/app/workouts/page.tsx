@@ -23,9 +23,11 @@ import { WorkoutTrackerCard } from '@/components/workouts/workout-tracker-card';
 import { WorkoutDisciplineChart } from '@/components/workouts/workout-discipline-chart';
 import { processWorkoutsForChart } from '@/lib/chart-utils';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function WorkoutsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [history, setHistory] = useState<WorkoutHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,6 +124,13 @@ export default function WorkoutsPage() {
                 total: totalWorkouts,
             }, { merge: true });
         });
+
+        if (isCompleted && !workout.completed) {
+            toast({
+                title: '+10 XP!',
+                description: 'You earned XP for completing a workout.',
+            });
+        }
     } catch (e) {
         console.error("Transaction failed: ", e);
     }

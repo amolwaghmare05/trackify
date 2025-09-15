@@ -222,6 +222,13 @@ export default function GoalsPage() {
                 total: totalTasks,
             }, { merge: true });
         });
+
+        if (isCompleted && !task.completed) {
+            toast({
+                title: '+5 XP!',
+                description: 'You earned XP for completing a goal task.',
+            });
+        }
     } catch (e) {
         console.error("Transaction failed: ", e);
     }
