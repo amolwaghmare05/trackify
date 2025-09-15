@@ -10,7 +10,7 @@ import type { MonthlySummary } from '@/lib/types';
 const chartConfig = {
   discipline: {
     label: 'Discipline',
-    color: 'hsl(var(--primary))',
+    color: 'hsl(56 67% 80%)',
   },
 } satisfies ChartConfig;
 
