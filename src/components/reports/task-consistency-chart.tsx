@@ -19,7 +19,7 @@ export function TaskConsistencyChart({ data }: { data: MonthlySummary[] }) {
     <Card>
       <CardHeader>
         <div className="flex items-start gap-3">
-          <TrendingUp className="h-6 w-6 mt-1 text-primary" />
+          <TrendingUp className="h-6 w-6 mt-1 text-foreground" />
           <div>
             <CardTitle className="font-headline">Overall Task Consistency</CardTitle>
             <CardDescription>Your month-over-month task consistency.</CardDescription>

@@ -19,7 +19,7 @@ export function WorkoutDisciplineChart({ data }: { data: MonthlySummary[] }) {
     <Card>
       <CardHeader>
         <div className="flex items-start gap-3">
-          <Activity className="h-6 w-6 mt-1 text-accent" />
+          <Activity className="h-6 w-6 mt-1 text-foreground" />
           <div>
             <CardTitle className="font-headline">Overall Workout Discipline</CardTitle>
             <CardDescription>Your month-over-month workout discipline.</CardDescription>

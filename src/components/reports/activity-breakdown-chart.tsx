@@ -32,7 +32,7 @@ export function ActivityBreakdownChart({ data }: { data: ActivityBreakdownData[]
     <Card>
       <CardHeader>
         <div className="flex items-start gap-3">
-          <BadgePercent className="h-6 w-6 mt-1 text-primary" />
+          <BadgePercent className="h-6 w-6 mt-1 text-foreground" />
           <div>
             <CardTitle className="font-headline">Activity Breakdown</CardTitle>
             <CardDescription>A breakdown of your total XP earned by activity.</CardDescription>
