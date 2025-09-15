@@ -53,7 +53,7 @@ export default function ReportsPage() {
     return (
         <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-8">
              <div className="mb-8 flex items-center gap-3">
-                <BarChartHorizontal className="h-8 w-8 text-primary" />
+                <BarChartHorizontal className="h-8 w-8 text-foreground" />
                 <div>
                     <h1 className="text-3xl font-bold font-headline tracking-tight">Reports</h1>
                     <p className="text-muted-foreground">An overview of your long-term progress and activity.</p>
@@ -72,7 +72,7 @@ export default function ReportsPage() {
     return (
         <div className="container mx-auto p-4 sm:p-6 md:p-8">
              <div className="mb-8 flex items-center gap-3">
-                <BarChartHorizontal className="h-8 w-8 text-primary" />
+                <BarChartHorizontal className="h-8 w-8 text-foreground" />
                 <div>
                     <h1 className="text-3xl font-bold font-headline tracking-tight">Reports</h1>
                     <p className="text-muted-foreground">An overview of your long-term progress and activity.</p>
@@ -86,7 +86,7 @@ export default function ReportsPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 md:p-8">
       <div className="mb-8 flex items-center gap-3">
-        <BarChartHorizontal className="h-8 w-8 text-primary" />
+        <BarChartHorizontal className="h-8 w-8 text-foreground" />
         <div>
             <h1 className="text-3xl font-bold font-headline tracking-tight">Reports</h1>
             <p className="text-muted-foreground">An overview of your long-term progress and activity.</p>
