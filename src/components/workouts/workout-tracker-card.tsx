@@ -26,7 +26,7 @@ export function WorkoutTrackerCard({ workouts, onAddWorkout, onUpdateWorkout, on
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-start gap-3">
-            <Dumbbell className="h-6 w-6 mt-1 text-primary" />
+            <Dumbbell className="h-6 w-6 mt-1 text-foreground" />
             <div>
               <CardTitle className="font-headline">Workout Tracker</CardTitle>
               <CardDescription>Your daily workout checklist. Stay disciplined!</CardDescription>

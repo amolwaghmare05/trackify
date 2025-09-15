@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -32,7 +33,7 @@ export function WorkoutDisciplineChart({ data }: WorkoutDisciplineChartProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
             <div className="flex items-start gap-3">
-                <Activity className="h-6 w-6 mt-1 text-primary" />
+                <Activity className="h-6 w-6 mt-1 text-foreground" />
                 <div>
                     <CardTitle className="font-headline">Workout Discipline</CardTitle>
                     <CardDescription>Your workout consistency for {monthName}.</CardDescription>
