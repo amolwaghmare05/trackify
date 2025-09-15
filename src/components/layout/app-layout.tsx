@@ -5,7 +5,6 @@ import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 import * as React from 'react';
 
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -13,7 +12,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
     <div
       className={cn(
         'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-        'md:group-data-[sidebar-open=true]:pl-[var(--sidebar-width)] md:group-data-[sidebar-open=false]:pl-[var(--sidebar-width-collapsed)]'
+        'md:pl-[var(--sidebar-width-collapsed)] group-data-[sidebar-open=true]/sidebar-wrapper:md:pl-[var(--sidebar-width)]'
       )}
     >
       <Header />
