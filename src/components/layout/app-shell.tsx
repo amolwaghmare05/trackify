@@ -6,10 +6,11 @@ import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 const NO_LAYOUT_ROUTES = ['/sign-in', '/sign-up'];
 
-function MainContent({ children }: { children: React.ReactNode }) {
+function MainContent({ children }: { children: React.Node }) {
   const { open } = useSidebar();
 
   return (
@@ -30,11 +31,21 @@ function MainContent({ children }: { children: React.ReactNode }) {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const showLayout = !NO_LAYOUT_ROUTES.includes(pathname);
 
   if (!showLayout) {
     return <>{children}</>;
+  }
+
+  // Render a loader or null on the server and initial client render
+  if (!mounted) {
+    return null; 
   }
 
   return (
