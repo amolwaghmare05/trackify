@@ -15,6 +15,7 @@ import {
   increment,
   Timestamp,
   getDocs,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -68,6 +69,8 @@ export default function WorkoutsPage() {
 
   const handleAddWorkout = async (title: string) => {
     if (!user) return;
+
+    // Add the new workout
     await addDoc(collection(db, 'users', user.uid, 'workouts'), {
       title,
       userId: user.uid,
@@ -76,6 +79,17 @@ export default function WorkoutsPage() {
       completedAt: null,
       createdAt: new Date(),
     });
+
+    // Update today's history to reflect the new total
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const historyDocRef = doc(db, 'users', user.uid, 'workoutHistory', todayStr);
+    
+    // Using set with merge to create the doc if it doesn't exist or update it if it does.
+    // We increment the total number of workouts for today.
+    await setDoc(historyDocRef, { 
+        date: Timestamp.fromDate(new Date()),
+        total: increment(1) 
+    }, { merge: true });
   };
 
   const handleUpdateWorkout = async (workout: Workout, isCompleted: boolean) => {
@@ -159,10 +173,10 @@ export default function WorkoutsPage() {
     const historyDocRef = doc(db, 'users', user.uid, 'workoutHistory', todayStr);
     const remainingWorkouts = workouts.filter(w => w.id !== workoutId);
     
-    await updateDoc(historyDocRef, {
+    await setDoc(historyDocRef, {
         total: remainingWorkouts.length,
         completed: remainingWorkouts.filter(w => w.completed).length
-    });
+    }, { merge: true });
   };
 
   if (loading) {
