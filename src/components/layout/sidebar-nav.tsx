@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -27,7 +28,7 @@ export function SidebarNav() {
 
   return (
     <>
-    <SidebarHeader className="border-b p-4">
+    <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
             <Target className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
