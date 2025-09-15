@@ -23,7 +23,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarNav />
         </Sidebar>
-        <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out md:group-data-[sidebar-open=true]/sidebar-wrapper:ml-[var(--sidebar-width)] md:group-data-[sidebar-open=false]/sidebar-wrapper:ml-[var(--sidebar-width-collapsed)]">
+        <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out md:pl-[var(--sidebar-width-collapsed)] group-data-[sidebar-open=true]/sidebar-wrapper:md:pl-[var(--sidebar-width)]">
           <Header />
           <main className="flex-1">
             {children}
