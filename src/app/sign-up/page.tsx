@@ -47,7 +47,7 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Sign Up | Triumph Track';
+  document.title = 'Trackify';
   }, []);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function SignUpPage() {
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
               <Target className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold font-headline">Triumph Track</h1>
+              <h1 className="text-3xl font-bold font-headline">Trackify</h1>
             </div>
             <CardDescription>Enter your information to create an account.</CardDescription>
         </CardHeader>

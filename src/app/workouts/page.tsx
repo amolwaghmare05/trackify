@@ -198,14 +198,20 @@ export default function WorkoutsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <WorkoutTrackerCard
-        workouts={workouts}
-        onAddWorkout={handleAddWorkout}
-        onUpdateWorkout={handleUpdateWorkout}
-        onDeleteWorkout={handleDeleteWorkout}
-      />
-      {chartData && <WorkoutDisciplineChart data={chartData} />}
+    <div className="container mx-auto p-4 md:p-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <WorkoutTrackerCard
+            workouts={workouts}
+            onAddWorkout={handleAddWorkout}
+            onUpdateWorkout={handleUpdateWorkout}
+            onDeleteWorkout={handleDeleteWorkout}
+          />
+        </div>
+        <div>
+          {chartData && <WorkoutDisciplineChart data={chartData} />}
+        </div>
+      </div>
     </div>
   );
 }

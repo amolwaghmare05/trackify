@@ -56,6 +56,30 @@ export function ActivityBreakdownChart({ data }: { data: ActivityBreakdownData[]
             </Pie>
           </PieChart>
         </ChartContainer>
+          {/* Color Legend with Streak XP */}
+          <div className="flex flex-col items-center gap-2 mt-6">
+            <div className="flex justify-center gap-6">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-4 h-4 rounded-full" style={{ background: CHART_COLORS[0] }}></span>
+                <span className="text-sm text-muted-foreground">Daily Tasks</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-4 h-4 rounded-full" style={{ background: CHART_COLORS[1] }}></span>
+                <span className="text-sm text-muted-foreground">Workouts</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-4 h-4 rounded-full" style={{ background: CHART_COLORS[2] }}></span>
+                <span className="text-sm text-muted-foreground">Goals Completed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500"></span>
+                <span className="text-sm text-muted-foreground">Streak XP</span>
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground text-center">
+              <span>Streak XP: Earned for maintaining daily and workout streaks. The longer your streak, the more XP you earn!</span>
+            </div>
+          </div>
       </CardContent>
     </Card>
   );

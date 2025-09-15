@@ -17,7 +17,7 @@ const ptSans = PT_Sans({
 });
 
 // export const metadata: Metadata = {
-//   title: 'Triumph Track',
+//   title: 'Trackify',
 //   description: 'Your personal goal tracker to achieve greatness.',
 // };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Triumph Track</title>
+  <title>Trackify</title>
         <meta name="description" content="Your personal goal tracker to achieve greatness." />
       </head>
       <body className={`${inter.variable} ${ptSans.variable} font-body antialiased bg-background text-foreground`}>

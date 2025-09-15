@@ -83,25 +83,25 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
+  <div className="container mx-auto px-2 py-4 sm:px-4 md:px-8 md:py-8 space-y-8">
       <div className="text-left">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Welcome back, {user.displayName}!</h1>
         <p className="text-muted-foreground">Here's a look at your progress and today's tasks.</p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-8">
-            <TodayListCard />
-            <AIMotivation
-                userName={user.displayName || 'champion'}
-                goal={primaryGoal?.title}
-                progressPercentage={primaryGoal?.progress || 0}
-                consistencyScore={overallConsistency}
-            />
-        </div>
-        <div className="lg:col-span-2 space-y-8">
-            <WeeklyProgressChart data={chartData.weeklyProgress} />
-            <ConsistencyTrendChart data={chartData.consistencyTrend} />
-        </div>
+      {/* Top row: Today's List and AI Coach side by side */}
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.6fr_1fr] gap-6 md:gap-8 mb-8">
+        <TodayListCard />
+        <AIMotivation
+          userName={user.displayName || 'champion'}
+          goal={primaryGoal?.title}
+          progressPercentage={primaryGoal?.progress || 0}
+          consistencyScore={overallConsistency}
+        />
+      </div>
+      {/* Bottom row: Weekly Progress and Consistency Trend charts side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <WeeklyProgressChart data={chartData.weeklyProgress} />
+        <ConsistencyTrendChart data={chartData.consistencyTrend} />
       </div>
     </div>
   );

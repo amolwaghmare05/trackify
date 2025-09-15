@@ -32,7 +32,7 @@ export function SidebarNav() {
         <div className="flex items-center gap-2">
             <Target className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold font-headline">Triumph Track</h1>
+              <h1 className="text-xl font-bold font-headline">Trackify</h1>
               <p className="text-xs text-muted-foreground">Your Goal Companion</p>
             </div>
         </div>

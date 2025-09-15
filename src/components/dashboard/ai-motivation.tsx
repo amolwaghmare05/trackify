@@ -18,35 +18,48 @@ export function AIMotivation({ userName, goal, progressPercentage, consistencySc
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [refreshId, setRefreshId] = useState(0);
   const motivationInput = useMemo(() => ({
     userName,
     goal,
     progressPercentage,
     consistencyScore,
-  }), [userName, goal, progressPercentage, consistencyScore]);
+    refreshId,
+  }), [userName, goal, progressPercentage, consistencyScore, refreshId]);
+
+  const fetchMotivation = async () => {
+    setLoading(true);
+    try {
+      const result = await getMotivationAction(motivationInput);
+      setMessage(result.message);
+    } catch (error) {
+      console.error('Failed to fetch AI motivation:', error);
+      setMessage("Keep pushing forward, you're on the right track!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMotivation = async () => {
-      setLoading(true);
-      try {
-        const result = await getMotivationAction(motivationInput);
-        setMessage(result.message);
-      } catch (error) {
-        console.error('Failed to fetch AI motivation:', error);
-        setMessage("Keep pushing forward, you're on the right track!");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMotivation();
   }, [motivationInput]);
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-        <Sparkles className="h-6 w-6 text-foreground" />
-        <CardTitle className="font-headline">AI Coach</CardTitle>
+      <CardHeader className="flex flex-row items-center gap-3 space-y-0 justify-between">
+        <div className="flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-foreground" />
+          <CardTitle className="font-headline">AI Coach</CardTitle>
+        </div>
+        <button
+          type="button"
+          className="px-2 py-1 rounded-md bg-muted hover:bg-primary/10 text-xs text-muted-foreground border border-muted-foreground/20 transition-colors"
+          onClick={() => { setRefreshId(Math.random()); fetchMotivation(); }}
+          disabled={loading}
+          aria-label="Refresh Motivation"
+        >
+          Refresh
+        </button>
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">

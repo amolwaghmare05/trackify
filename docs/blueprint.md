@@ -1,4 +1,4 @@
-# **App Name**: Triumph Track
+# **App Name**: Trackify
 
 ## Core Features:
 
