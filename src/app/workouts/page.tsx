@@ -25,6 +25,7 @@ import { WorkoutDisciplineChart } from '@/components/workouts/workout-discipline
 import { processWorkoutsForChart } from '@/lib/chart-utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { getStreakBonusXp } from '@/lib/levels';
 
 export default function WorkoutsPage() {
   const { user } = useAuth();
@@ -99,6 +100,8 @@ export default function WorkoutsPage() {
     const historyDocRef = doc(db, 'users', user.uid, 'workoutHistory', todayStr);
     const workoutRef = doc(db, 'users', user.uid, 'workouts', workout.id);
     const userRef = doc(db, 'users', user.uid);
+    let xpChange = 0;
+    let toastDescription = 'You earned XP for completing a workout.';
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -109,8 +112,15 @@ export default function WorkoutsPage() {
             let newStreak = workout.streak || 0;
             if (isCompleted && !workout.completed) {
                 newStreak++;
+                const baseXp = 5;
+                const bonusXp = getStreakBonusXp(newStreak);
+                xpChange = baseXp + bonusXp;
+                if (bonusXp > 0) {
+                    toastDescription = `+${baseXp} XP, plus a +${bonusXp} XP bonus for your ${newStreak}-day streak!`;
+                }
             } else if (!isCompleted && workout.completed) {
                 newStreak = Math.max(0, newStreak - 1);
+                xpChange = -5;
             }
             transaction.update(workoutRef, { 
                 completed: isCompleted,
@@ -120,7 +130,7 @@ export default function WorkoutsPage() {
             
             // Grant/remove XP
             if (isCompleted !== workout.completed) {
-                transaction.set(userRef, { xp: increment(isCompleted ? 5 : -5) }, { merge: true });
+                transaction.set(userRef, { xp: increment(xpChange) }, { merge: true });
             }
 
             // Update history
@@ -141,8 +151,8 @@ export default function WorkoutsPage() {
 
         if (isCompleted && !workout.completed) {
             toast({
-                title: '+5 XP!',
-                description: 'You earned XP for completing a workout.',
+                title: `+${xpChange} XP!`,
+                description: toastDescription,
             });
         }
     } catch (e) {

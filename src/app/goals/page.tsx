@@ -13,6 +13,7 @@ import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
 import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
 import { processTasksForCharts } from '@/lib/chart-utils';
 import { useToast } from '@/hooks/use-toast';
+import { getStreakBonusXp } from '@/lib/levels';
 
 async function completeGoal(goal: Goal, toast: ReturnType<typeof useToast>['toast']) {
     if (!goal || !goal.userId || !goal.id) return;
@@ -52,7 +53,7 @@ async function completeGoal(goal: Goal, toast: ReturnType<typeof useToast>['toas
         });
         toast({
             title: '+30 XP!',
-            description: `You completed the goal: "${goal.title}"`,
+            description: `You completed the goal: "${goal.title}" and it's now in your achievements.`,
         });
     } catch (e) {
         console.error("Transaction failed: ", e);
@@ -192,6 +193,8 @@ export default function GoalsPage() {
     const taskRef = doc(db, 'users', user.uid, 'dailyTasks', task.id);
     const goalRef = doc(db, 'users', user.uid, 'goals', task.goalId);
     const userRef = doc(db, 'users', user.uid);
+    let xpChange = 0;
+    let toastDescription = 'You earned XP for completing a goal task.';
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -202,9 +205,17 @@ export default function GoalsPage() {
             let newStreak = task.streak || 0;
             if (isCompleted && !task.completed) {
                 newStreak++;
+                const baseXp = 5;
+                const bonusXp = getStreakBonusXp(newStreak);
+                xpChange = baseXp + bonusXp;
+                if (bonusXp > 0) {
+                    toastDescription = `+${baseXp} XP, plus a +${bonusXp} XP bonus for your ${newStreak}-day streak!`;
+                }
             } else if (!isCompleted && task.completed) {
                 newStreak = Math.max(0, newStreak - 1);
+                xpChange = -5;
             }
+
             transaction.update(taskRef, { 
                 completed: isCompleted,
                 streak: newStreak,
@@ -218,7 +229,7 @@ export default function GoalsPage() {
             }
 
             if(isCompleted !== task.completed) {
-                transaction.set(userRef, { xp: increment(isCompleted ? 5 : -5) }, { merge: true });
+                transaction.set(userRef, { xp: increment(xpChange) }, { merge: true });
             }
 
             const allTasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'));
@@ -238,8 +249,8 @@ export default function GoalsPage() {
 
         if (isCompleted && !task.completed) {
             toast({
-                title: '+5 XP!',
-                description: 'You earned XP for completing a goal task.',
+                title: `+${xpChange} XP!`,
+                description: toastDescription,
             });
         }
     } catch (e) {

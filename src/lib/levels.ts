@@ -55,3 +55,11 @@ export const calculateLevel = (xp: number): UserLevel => {
     xpForNextLevel: nextLevelInfo?.xp || currentLevelInfo?.xp || 0,
   };
 };
+
+export const getStreakBonusXp = (streak: number): number => {
+    if (streak === 30) return 30;
+    if (streak === 15) return 20;
+    if (streak === 7) return 10;
+    if (streak === 3) return 5;
+    return 0;
+};
