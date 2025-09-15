@@ -7,7 +7,7 @@ import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/compone
 import { BadgePercent } from 'lucide-react';
 import type { ActivityBreakdownData } from '@/lib/types';
 
-const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))'];
+const CHART_COLORS = ['hsl(var(--primary))', 'hsl(56 67% 80%)', 'hsl(var(--secondary))'];
 
 const chartConfig = {
   xp: {
