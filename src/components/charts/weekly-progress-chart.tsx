@@ -31,7 +31,7 @@ export function WeeklyProgressChart({ data }: WeeklyProgressChartProps) {
     <Card>
       <CardHeader>
         <div className="flex items-start gap-3">
-          <CheckCircle className="h-6 w-6 mt-1 text-primary" />
+          <CheckCircle className="h-6 w-6 mt-1 text-foreground" />
           <div>
             <CardTitle className="font-headline">Weekly Progress</CardTitle>
             <CardDescription>
