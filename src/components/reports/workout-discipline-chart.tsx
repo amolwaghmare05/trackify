@@ -10,7 +10,7 @@ import type { MonthlySummary } from '@/lib/types';
 const chartConfig = {
   discipline: {
     label: 'Discipline',
-    color: 'hsl(var(--accent))',
+    color: 'hsl(var(--primary))',
   },
 } satisfies ChartConfig;
 
@@ -53,7 +53,7 @@ export function WorkoutDisciplineChart({ data }: { data: MonthlySummary[] }) {
                 indicator='dot'
               />}
             />
-            <Bar dataKey="discipline" fill="hsl(var(--accent))" radius={8} />
+            <Bar dataKey="discipline" fill="var(--color-discipline)" radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>
