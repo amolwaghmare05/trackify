@@ -8,8 +8,7 @@ import { StatCard } from './stat-card';
 import { type UserLevel } from '@/lib/levels';
 import { XpProgressBar } from './xp-progress-bar';
 import { Button } from '../ui/button';
-import { LevelXpDialog } from './level-xp-dialog';
-import { XpEarningInfoDialog } from './xp-earning-info-dialog';
+import { StatsInfoDialog } from './stats-info-dialog';
 
 interface StatisticsCardProps {
   xp: number;
@@ -20,8 +19,7 @@ interface StatisticsCardProps {
 }
 
 export function StatisticsCard({ xp, level, goalsCompleted, dailyTasksDone, workoutsDone }: StatisticsCardProps) {
-  const [isLevelInfoOpen, setIsLevelInfoOpen] = useState(false);
-  const [isXpInfoOpen, setIsXpInfoOpen] = useState(false);
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
 
   return (
     <>
@@ -34,14 +32,10 @@ export function StatisticsCard({ xp, level, goalsCompleted, dailyTasksDone, work
                       <CardDescription>A summary of your achievements.</CardDescription>
                   </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => setIsXpInfoOpen(true)}>
+              <Button variant="ghost" size="icon" onClick={() => setIsInfoDialogOpen(true)}>
                   <Info className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => setIsLevelInfoOpen(true)}>
-                  <Info className="h-5 w-5" />
-                </Button>
-              </div>
+                  <span className="sr-only">Show statistics info</span>
+              </Button>
           </CardHeader>
           <CardContent className="space-y-6">
               <Card className="p-4 bg-muted/50">
@@ -68,8 +62,7 @@ export function StatisticsCard({ xp, level, goalsCompleted, dailyTasksDone, work
               </div>
           </CardContent>
       </Card>
-      <LevelXpDialog isOpen={isLevelInfoOpen} onOpenChange={setIsLevelInfoOpen} />
-      <XpEarningInfoDialog isOpen={isXpInfoOpen} onOpenChange={setIsXpInfoOpen} />
+      <StatsInfoDialog isOpen={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen} />
     </>
   );
 }
