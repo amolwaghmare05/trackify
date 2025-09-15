@@ -5,6 +5,8 @@ import { Sidebar, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import * as React from 'react';
 
 function MainContent({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +26,16 @@ function MainContent({ children }: { children: React.ReactNode }) {
 
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return null;
+    }
+
     return (
         <SidebarProvider>
             <div className="relative flex min-h-screen">
