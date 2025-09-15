@@ -26,7 +26,7 @@ export function StatisticsCard({ xp, level, goalsCompleted, dailyTasksDone, work
       <Card>
           <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-3">
-                  <BarChartHorizontal className="h-6 w-6 text-primary" />
+                  <BarChartHorizontal className="h-6 w-6 text-foreground" />
                   <div>
                       <CardTitle className="font-headline">Your Statistics</CardTitle>
                       <CardDescription>A summary of your achievements.</CardDescription>

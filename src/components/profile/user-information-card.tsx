@@ -40,7 +40,7 @@ export function UserInformationCard({ user, onUpdateName, level }: UserInformati
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-            <UserIcon className="h-6 w-6 text-primary" />
+            <UserIcon className="h-6 w-6 text-foreground" />
             <div>
                 <CardTitle className="font-headline">User Information</CardTitle>
                 <CardDescription>Your personal account details.</CardDescription>
