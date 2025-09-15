@@ -51,7 +51,7 @@ export default function ReportsPage() {
 
   if (loading || authLoading) {
     return (
-        <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-8">
+        <div className="container mx-auto p-4 md:p-8 space-y-8">
              <div className="mb-8 flex items-center gap-3">
                 <BarChartHorizontal className="h-8 w-8 text-foreground" />
                 <div>
@@ -70,7 +70,7 @@ export default function ReportsPage() {
 
   if (!reportData) {
     return (
-        <div className="container mx-auto p-4 sm:p-6 md:p-8">
+        <div className="container mx-auto p-4 md:p-8">
              <div className="mb-8 flex items-center gap-3">
                 <BarChartHorizontal className="h-8 w-8 text-foreground" />
                 <div>
@@ -84,7 +84,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 md:p-8">
+    <div className="container mx-auto p-4 md:p-8">
       <div className="mb-8 flex items-center gap-3">
         <BarChartHorizontal className="h-8 w-8 text-foreground" />
         <div>
