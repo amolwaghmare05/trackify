@@ -24,7 +24,6 @@ function MainContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = React.useState(false);
 
