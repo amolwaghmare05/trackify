@@ -106,7 +106,7 @@ export default function WorkoutsPage() {
             
             // Grant/remove XP
             if (isCompleted !== workout.completed) {
-                transaction.set(userRef, { xp: increment(isCompleted ? 10 : -10) }, { merge: true });
+                transaction.set(userRef, { xp: increment(isCompleted ? 5 : -5) }, { merge: true });
             }
 
             // Update history
@@ -127,7 +127,7 @@ export default function WorkoutsPage() {
 
         if (isCompleted && !workout.completed) {
             toast({
-                title: '+10 XP!',
+                title: '+5 XP!',
                 description: 'You earned XP for completing a workout.',
             });
         }
@@ -149,7 +149,7 @@ export default function WorkoutsPage() {
     // If the deleted workout was completed, remove its XP
     if (workoutToDelete.completed) {
         const userRef = doc(db, 'users', user.uid);
-        batch.update(userRef, { xp: increment(-10) });
+        batch.update(userRef, { xp: increment(-5) });
     }
 
     await batch.commit();

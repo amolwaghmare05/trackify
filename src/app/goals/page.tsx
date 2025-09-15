@@ -20,6 +20,7 @@ async function completeGoal(goal: Goal, toast: ReturnType<typeof useToast>['toas
     const completedGoalRef = doc(collection(db, 'users', goal.userId, 'completedGoals'));
     const originalGoalRef = doc(db, 'users', goal.userId, 'goals', goal.id);
     const tasksQuery = query(collection(db, 'users', goal.userId, 'dailyTasks'), where('goalId', '==', goal.id));
+    const userRef = doc(db, 'users', goal.userId);
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -45,10 +46,13 @@ async function completeGoal(goal: Goal, toast: ReturnType<typeof useToast>['toas
             tasksSnapshot.forEach((taskDoc) => {
                 transaction.delete(doc(db, 'users', goal.userId, 'dailyTasks', taskDoc.id));
             });
+
+            // 4. Award XP for completing the goal
+            transaction.set(userRef, { xp: increment(30) }, { merge: true });
         });
         toast({
-            title: 'Goal Completed!',
-            description: `"${goal.title}" is now in your achievements.`,
+            title: '+30 XP!',
+            description: `You completed the goal: "${goal.title}"`,
         });
     } catch (e) {
         console.error("Transaction failed: ", e);
