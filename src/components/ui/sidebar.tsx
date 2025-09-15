@@ -9,7 +9,7 @@ import { PanelLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import {
   Tooltip,
   TooltipContent,
@@ -116,6 +116,7 @@ const Sidebar = React.forwardRef<
           className="w-[18rem] bg-card p-0 text-card-foreground [&>button]:hidden"
           side={side}
         >
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
@@ -126,13 +127,18 @@ const Sidebar = React.forwardRef<
     <aside
       ref={ref}
       className={cn(
-        'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-card text-card-foreground border-r transition-all duration-300 ease-in-out',
-        !mounted ? 'w-[var(--sidebar-width)]' : (open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]'),
+        'fixed top-0 z-40 hidden h-screen flex-col border-r bg-card text-card-foreground transition-all duration-300 ease-in-out md:flex',
+        mounted
+          ? open
+            ? 'w-[var(--sidebar-width)]'
+            : 'w-[var(--sidebar-width-collapsed)]'
+          : 'w-[var(--sidebar-width)]',
+        side === 'left' ? 'left-0' : 'right-0',
         className
       )}
       {...props}
     >
-      <div className="flex-1 flex flex-col min-w-[var(--sidebar-width)]">{children}</div>
+      <div className="flex min-w-[var(--sidebar-width)] flex-1 flex-col">{children}</div>
     </aside>
   );
 });
