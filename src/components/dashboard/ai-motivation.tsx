@@ -45,14 +45,14 @@ export function AIMotivation({ userName, goal, progressPercentage, consistencySc
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-        <Sparkles className="h-6 w-6 text-primary" />
+        <Sparkles className="h-6 w-6 text-foreground" />
         <CardTitle className="font-headline">AI Coach</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Bot className="h-6 w-6 text-primary" />
+                <Bot className="h-6 w-6 text-foreground" />
             </div>
           </div>
           <div className="flex-1 pt-1">

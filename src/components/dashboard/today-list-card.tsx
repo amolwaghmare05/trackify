@@ -126,7 +126,7 @@ export function TodayListCard() {
       <Card>
         <CardHeader>
             <div className="flex items-start gap-3">
-                <ClipboardList className="h-6 w-6 mt-1 text-primary" />
+                <ClipboardList className="h-6 w-6 mt-1 text-foreground" />
                 <div>
                 <CardTitle className="font-headline">Today's List</CardTitle>
                 <CardDescription>Your daily to-do list for miscellaneous tasks.</CardDescription>
