@@ -55,4 +55,3 @@ export const calculateLevel = (xp: number): UserLevel => {
     xpForNextLevel: nextLevelInfo?.xp || currentLevelInfo?.xp || 0,
   };
 };
-
