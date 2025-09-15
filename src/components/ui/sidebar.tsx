@@ -108,6 +108,9 @@ const Sidebar = React.forwardRef<
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return null; // Don't render on the server
+  }
 
   if (isMobile) {
     return (
@@ -128,11 +131,7 @@ const Sidebar = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed top-0 z-40 hidden h-screen flex-col border-r bg-card text-card-foreground transition-all duration-300 ease-in-out md:flex',
-        mounted
-          ? open
-            ? 'w-[var(--sidebar-width)]'
-            : 'w-[var(--sidebar-width-collapsed)]'
-          : 'w-[var(--sidebar-width)]',
+        open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]',
         side === 'left' ? 'left-0' : 'right-0',
         className
       )}
