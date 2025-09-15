@@ -184,7 +184,7 @@ export function TodayListCard() {
           </div>
         </CardContent>
         <CardHeader>
-             <Button onClick={() => setIsAddTaskDialogOpen(true)} variant="outline" className="w-full">
+             <Button onClick={() => setIsAddTaskDialogOpen(true)} className="w-full">
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Task
              </Button>
         </CardHeader>
