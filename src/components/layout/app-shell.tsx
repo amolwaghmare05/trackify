@@ -18,11 +18,27 @@ function MainContent({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return (
+        <div
+        className={cn(
+          'flex-1 flex flex-col transition-all duration-300 ease-in-out',
+          'md:pl-[var(--sidebar-width)]'
+        )}
+      >
+        <Header />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
         'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-        mounted ? (open ? 'md:pl-[var(--sidebar-width)]' : 'md:pl-[var(--sidebar-width-collapsed)]') : 'md:pl-[var(--sidebar-width)]'
+        open ? 'md:pl-[var(--sidebar-width)]' : 'md:pl-[var(--sidebar-width-collapsed)]'
       )}
     >
       <Header />

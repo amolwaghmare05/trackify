@@ -102,6 +102,12 @@ const Sidebar = React.forwardRef<
   React.ComponentProps<'div'> & { side?: 'left' | 'right' }
 >(({ side = 'left', className, children, ...props }, ref) => {
   const { isMobile, open, openMobile, setOpenMobile } = useSidebar();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
 
   if (isMobile) {
     return (
@@ -121,7 +127,7 @@ const Sidebar = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed top-0 left-0 h-screen z-40 hidden md:flex flex-col bg-card text-card-foreground border-r transition-all duration-300 ease-in-out',
-        open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]',
+        !mounted ? 'w-[var(--sidebar-width)]' : (open ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-collapsed)]'),
         className
       )}
       {...props}
