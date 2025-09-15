@@ -22,7 +22,7 @@ function AchievementItem({ goal }: { goal: CompletedGoal }) {
         <Card>
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <CheckCircle className="h-8 w-8 text-green-500" />
+                    <CheckCircle className="h-8 w-8 text-primary" />
                     <div>
                         <p className="font-semibold">{goal.title}</p>
                         <p className="text-sm text-muted-foreground">
