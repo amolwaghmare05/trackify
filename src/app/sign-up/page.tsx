@@ -14,11 +14,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Target } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/auth-context';
 
 const signUpSchema = z.object({
-  username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
+  name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
@@ -42,16 +43,23 @@ const getFirebaseAuthErrorMessage = (errorCode: string): string => {
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Sign Up | Trackify';
   }, []);
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      username: '',
+      name: '',
       email: '',
       password: '',
     },
@@ -63,15 +71,15 @@ export default function SignUpPage() {
       const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      // Update the user's profile display name
       await updateProfile(userCredential.user, {
-        displayName: data.username,
+        displayName: data.name,
       });
 
-      // Create a document for the user in the 'users' collection
       await setDoc(doc(db, 'users', userCredential.user.uid), {
+        displayName: data.name,
+        email: data.email,
         xp: 0,
-        // You can add any other initial user data here
+        level: 1,
       });
 
       router.push('/');
@@ -79,13 +87,20 @@ export default function SignUpPage() {
       setError(getFirebaseAuthErrorMessage(error.code));
     }
   };
+  
+  if (loading || user) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-          <CardDescription>Enter your details to sign up.</CardDescription>
+        <CardHeader className="text-center">
+            <div className="flex justify-center items-center gap-2 mb-4">
+              <Target className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold font-headline">Trackify</h1>
+            </div>
+            <CardDescription>Enter your information to create an account.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -99,12 +114,12 @@ export default function SignUpPage() {
               )}
               <FormField
                 control={form.control}
-                name="username"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your username" {...field} />
+                      <Input placeholder="Enter your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,14 +152,14 @@ export default function SignUpPage() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Creating Account...' : 'Sign Up'}
+                {form.formState.isSubmitting ? 'Creating Account...' : 'Create an account'}
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/sign-in" className="underline">
-              Sign in
+              Login
             </Link>
           </div>
         </CardContent>

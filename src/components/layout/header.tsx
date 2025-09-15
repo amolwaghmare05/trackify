@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Settings as SettingsIcon, User, LogOut } from 'lucide-react';
+import { Settings as SettingsIcon, User, LogOut, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
 import { auth, db } from '@/lib/firebase';
@@ -18,12 +17,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 import { Separator } from '../ui/separator';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { calculateLevel, getLevelDetails } from '@/lib/levels';
 import { cn } from '@/lib/utils';
+import { useSidebar } from '../ui/sidebar';
 
 function LiveClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -57,12 +57,11 @@ function LevelAvatar({ level, className }: { level: number; className?: string }
     const levelInfo = getLevelDetails(level);
     const Icon = levelInfo.icon;
     return (
-        <Avatar className={cn('border-2 border-primary', className)}>
+        <Avatar className={cn('border-2', className)} style={{ borderColor: levelInfo.color }}>
             <AvatarFallback
-                className="flex items-center justify-center"
-                style={{ backgroundColor: levelInfo.color, color: '#FFF' }}
+                className="flex items-center justify-center bg-background"
             >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" style={{ color: levelInfo.color }} />
             </AvatarFallback>
         </Avatar>
     );
@@ -71,6 +70,7 @@ function LevelAvatar({ level, className }: { level: number; className?: string }
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toggleSidebar } = useSidebar();
   const [userLevel, setUserLevel] = useState<ReturnType<typeof calculateLevel> | null>(null);
 
   useEffect(() => {
@@ -96,9 +96,18 @@ export function Header() {
   
   return (
     <header className="flex h-16 items-center justify-between px-4 sm:px-6 bg-card text-card-foreground border-b sticky top-0 z-30">
-      <div className="flex items-center gap-2">
-         <LiveClock />
-      </div>
+        <div className="flex items-center gap-4">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={toggleSidebar}
+            >
+                <PanelLeft className="h-6 w-6" />
+                <span className="sr-only">Toggle Sidebar</span>
+            </Button>
+            <LiveClock />
+        </div>
       <div className="flex items-center gap-4 ml-auto">
         {user && userLevel ? (
           <DropdownMenu>

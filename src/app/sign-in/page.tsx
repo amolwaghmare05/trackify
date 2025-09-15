@@ -13,9 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Target } from 'lucide-react';
 import Link from 'next/link';
 import { ForgotPasswordDialog } from '@/components/auth/forgot-password-dialog';
+import { useAuth } from '@/context/auth-context';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -41,12 +42,20 @@ const getFirebaseAuthErrorMessage = (errorCode: string): string => {
 
 export default function SignInPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   useEffect(() => {
     document.title = 'Sign In | Trackify';
   }, []);
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -66,13 +75,20 @@ export default function SignInPage() {
       setError(getFirebaseAuthErrorMessage(error.code));
     }
   };
+  
+  if (loading || user) {
+    return null; // or a loading spinner
+  }
 
   return (
     <>
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline">Sign In</CardTitle>
+          <CardHeader className="text-center">
+            <div className="flex justify-center items-center gap-2 mb-4">
+              <Target className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold font-headline">Trackify</h1>
+            </div>
             <CardDescription>Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -82,7 +98,6 @@ export default function SignInPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Sign In Failed</AlertTitle>
-
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}

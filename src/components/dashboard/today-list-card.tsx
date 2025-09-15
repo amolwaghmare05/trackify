@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -13,6 +12,8 @@ import {
   deleteDoc,
   Timestamp,
   orderBy,
+  runTransaction,
+  increment,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -20,13 +21,14 @@ import type { TodayTask } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { PlusCircle, Trash2, Star, ClipboardList } from 'lucide-react';
 import { AddTodayTaskDialog } from './add-today-task-dialog';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export function TodayListCard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [tasks, setTasks] = useState<TodayTask[]>([]);
   const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export function TodayListCard() {
     return tasks.slice().sort((a, b) => {
       if (a.isPrimary && !b.isPrimary) return -1;
       if (!a.isPrimary && b.isPrimary) return 1;
-      return 0; // Keep original order for tasks with same primary status
+      return 0;
     });
   }, [tasks]);
 
@@ -83,11 +85,35 @@ export function TodayListCard() {
     });
   };
 
-  const handleUpdateTask = async (taskId: string, data: Partial<TodayTask>) => {
+  const handleUpdateCompletion = async (task: TodayTask, completed: boolean) => {
+    if (!user) return;
+    const taskRef = doc(db, 'users', user.uid, 'todayTasks', task.id);
+    const userRef = doc(db, 'users', user.uid);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            if(task.completed !== completed){
+                transaction.update(taskRef, { completed });
+                transaction.set(userRef, { xp: increment(completed ? 2 : -2) }, { merge: true });
+            }
+        });
+        if (completed && !task.completed) {
+            toast({
+                title: '+2 XP!',
+                description: 'You earned XP for completing a daily task.',
+            });
+        }
+    } catch (e) {
+        console.error("Failed to update task completion: ", e);
+    }
+  };
+
+  const handleUpdatePrimary = async (taskId: string, isPrimary: boolean) => {
     if (!user) return;
     const taskRef = doc(db, 'users', user.uid, 'todayTasks', taskId);
-    await updateDoc(taskRef, data);
+    await updateDoc(taskRef, { isPrimary });
   };
+
 
   const handleDeleteTask = async (taskId: string) => {
     if (!user) return;
@@ -97,17 +123,14 @@ export function TodayListCard() {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-start gap-3">
-            <ClipboardList className="h-6 w-6 mt-1 text-primary" />
-            <div>
-              <CardTitle className="font-headline">Today's List</CardTitle>
-              <CardDescription>Your daily to-do list for miscellaneous tasks.</CardDescription>
+        <CardHeader>
+            <div className="flex items-start gap-3">
+                <ClipboardList className="h-6 w-6 mt-1 text-primary" />
+                <div>
+                <CardTitle className="font-headline">Today's List</CardTitle>
+                <CardDescription>Your daily to-do list for miscellaneous tasks.</CardDescription>
+                </div>
             </div>
-          </div>
-          <Button onClick={() => setIsAddTaskDialogOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Task
-          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -119,7 +142,7 @@ export function TodayListCard() {
                   <Checkbox
                     id={`task-${task.id}`}
                     checked={task.completed}
-                    onCheckedChange={(checked) => handleUpdateTask(task.id, { completed: !!checked })}
+                    onCheckedChange={(checked) => handleUpdateCompletion(task, !!checked)}
                   />
                   <div className="flex-1">
                     <label
@@ -132,16 +155,15 @@ export function TodayListCard() {
                       {task.title}
                     </label>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
                     <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-amber-500"
-                        onClick={() => handleUpdateTask(task.id, { isPrimary: !task.isPrimary })}
+                        onClick={() => handleUpdatePrimary(task.id, !task.isPrimary)}
                     >
                         <Star className={cn("h-4 w-4", task.isPrimary && "fill-amber-400 text-amber-500")} />
                     </Button>
-                    {task.completed && <Badge variant="outline">Done</Badge>}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -160,6 +182,11 @@ export function TodayListCard() {
             )}
           </div>
         </CardContent>
+        <CardHeader>
+             <Button onClick={() => setIsAddTaskDialogOpen(true)} variant="outline" className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Task
+             </Button>
+        </CardHeader>
       </Card>
       <AddTodayTaskDialog
         isOpen={isAddTaskDialogOpen}

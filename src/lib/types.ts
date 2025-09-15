@@ -1,4 +1,3 @@
-
 import type { Timestamp } from 'firebase/firestore';
 
 export interface Goal {
@@ -68,9 +67,10 @@ export interface UserProfile {
     uid: string;
     xp: number;
     level: number;
+    displayName?: string;
+    email?: string;
 }
 
-// Types for Reports Page
 export interface ActivityBreakdownData {
     activity: string;
     xp: number;
@@ -83,8 +83,14 @@ export interface MonthlySummary {
     discipline?: number;
 }
 
+export interface XpDataPoint {
+    date: string;
+    xp: number;
+}
+
 export interface ReportsPageData {
     activityBreakdown: ActivityBreakdownData[];
     taskConsistency: MonthlySummary[];
     workoutDiscipline: MonthlySummary[];
+    xpGrowth: XpDataPoint[];
 }

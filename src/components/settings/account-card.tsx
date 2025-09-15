@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { getAuth, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { doc, deleteDoc, collection, writeBatch, getDocs, query } from 'firebase/firestore';
+import { getAuth, deleteUser } from 'firebase/auth';
+import { doc, writeBatch, getDocs, query, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -32,26 +31,25 @@ export function AccountCard() {
   const [isReauthDialogOpen, setIsReauthDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-
   const performDelete = async () => {
     if (!user) return;
 
     setIsDeleting(true);
 
     try {
-      // All Firestore data is deleted first in a batch
       const collectionsToDelete = ['goals', 'completedGoals', 'dailyTasks', 'dailyTaskHistory', 'todayTasks', 'workouts', 'workoutHistory'];
       const batch = writeBatch(db);
+
       for (const collectionName of collectionsToDelete) {
         const q = query(collection(db, 'users', user.uid, collectionName));
         const snapshot = await getDocs(q);
         snapshot.docs.forEach((doc) => batch.delete(doc.ref));
       }
+      
       const userDocRef = doc(db, 'users', user.uid);
       batch.delete(userDocRef);
       await batch.commit();
 
-      // Finally, delete the auth user
       const auth = getAuth();
       if (auth.currentUser) {
         await deleteUser(auth.currentUser);
@@ -83,7 +81,6 @@ export function AccountCard() {
 
   const handleReauthSuccess = () => {
     setIsReauthDialogOpen(false);
-    // After successful re-authentication, show the confirmation dialog again
     setIsConfirmDialogOpen(true); 
   };
 
@@ -117,7 +114,7 @@ export function AccountCard() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={performDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                          <AlertDialogAction onClick={performDelete} disabled={isDeleting} variant="destructive">
                               {isDeleting ? 'Deleting...' : 'Delete'}
                           </AlertDialogAction>
                           </AlertDialogFooter>

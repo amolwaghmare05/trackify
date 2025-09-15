@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-import type { DailyTask, Goal, DailyTaskHistory } from '@/lib/types';
+import type { Goal, DailyTaskHistory } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { WeeklyProgressChart } from '@/components/charts/weekly-progress-chart';
 import { ConsistencyTrendChart } from '@/components/charts/consistency-trend-chart';
@@ -16,7 +15,6 @@ import { AIMotivation } from '@/components/dashboard/ai-motivation';
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [history, setHistory] = useState<DailyTaskHistory[]>([]);
 
@@ -39,15 +37,6 @@ export default function Home() {
         setGoals(userGoals);
       });
 
-      const tasksQuery = query(collection(db, 'users', user.uid, 'dailyTasks'));
-      const unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
-        const userTasks: DailyTask[] = [];
-        querySnapshot.forEach((doc) => {
-          userTasks.push({ id: doc.id, ...doc.data() } as DailyTask);
-        });
-        setTasks(userTasks);
-      });
-
       const historyQuery = query(collection(db, 'users', user.uid, 'dailyTaskHistory'));
       const unsubscribeHistory = onSnapshot(historyQuery, (querySnapshot) => {
         const userHistory: DailyTaskHistory[] = [];
@@ -57,14 +46,11 @@ export default function Home() {
         setHistory(userHistory);
       });
 
-
       return () => {
         unsubscribeGoals();
-        unsubscribeTasks();
         unsubscribeHistory();
       };
     } else {
-      setTasks([]);
       setGoals([]);
       setHistory([]);
     }
@@ -97,23 +83,24 @@ export default function Home() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-       <div className="mb-8 text-center">
+      <div className="mb-4 text-left">
         <h1 className="text-3xl font-bold font-headline tracking-tight">Welcome back, {user.displayName}!</h1>
         <p className="text-muted-foreground">Here's a look at your progress and today's tasks.</p>
       </div>
-
-      <TodayListCard />
-
-      <AIMotivation
-        userName={user.displayName || 'champion'}
-        goal={primaryGoal?.title}
-        progressPercentage={primaryGoal?.progress || 0}
-        consistencyScore={overallConsistency}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <WeeklyProgressChart data={chartData.weeklyProgress} />
-        <ConsistencyTrendChart data={chartData.consistencyTrend} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1 space-y-8">
+            <TodayListCard />
+            <AIMotivation
+                userName={user.displayName || 'champion'}
+                goal={primaryGoal?.title}
+                progressPercentage={primaryGoal?.progress || 0}
+                consistencyScore={overallConsistency}
+            />
+        </div>
+        <div className="lg:col-span-2 space-y-8">
+            <WeeklyProgressChart data={chartData.weeklyProgress} />
+            <ConsistencyTrendChart data={chartData.consistencyTrend} />
+        </div>
       </div>
     </div>
   );

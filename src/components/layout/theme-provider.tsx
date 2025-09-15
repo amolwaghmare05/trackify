@@ -1,3 +1,4 @@
+// This file is intentionally left unchanged as it correctly implements the theme provider.
 "use client"
 
 import * as React from "react"

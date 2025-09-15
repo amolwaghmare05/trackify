@@ -1,9 +1,17 @@
 import type { Metadata } from 'next';
+import { Inter, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
-import { AppLayout } from '@/components/layout/app-layout';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import AppShell from '@/components/layout/app-shell';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-pt-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Trackify',
@@ -17,23 +25,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="httpshttps://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased bg-background text-foreground">
+      <body className={`${inter.variable} ${ptSans.variable} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppLayout>
+            <AppShell>
               {children}
-            </AppLayout>
+            </AppShell>
           </AuthProvider>
         </ThemeProvider>
         <Toaster />
