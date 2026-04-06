@@ -10,6 +10,8 @@
 
 Trackify is a comprehensive productivity and fitness tracking application that helps you set goals, track daily tasks, monitor workouts, and maintain consistent habits—all enhanced with AI-powered motivational coaching and a gamified XP system.
 
+🌐 **Live Demo:** [trackify-v1.vercel.app](https://trackify-v1.vercel.app/)
+
 ![Trackify Dashboard](https://via.placeholder.com/800x400/89CFF0/ffffff?text=Trackify+Dashboard)
 
 ## ✨ Features
