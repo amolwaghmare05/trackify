@@ -31,7 +31,6 @@ export default function RootLayout({
       <head>
   <title>Trackify</title>
         <meta name="description" content="Your personal goal tracker to achieve greatness." />
-        <link rel="icon" href="/favicon.png" type="image/png" />
       </head>
       <body className={`${inter.variable} ${ptSans.variable} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
