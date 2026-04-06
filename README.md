@@ -169,5 +169,5 @@ If you have any questions or need help, please open an issue or reach out.
 ---
 
 <div align="center">
-Made with ❤️ and ☕ by Amol Waghmare
+Made with ❤️ by Amol Waghmare
 </div>
