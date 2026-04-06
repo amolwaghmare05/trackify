@@ -12,8 +12,6 @@ Trackify is a comprehensive productivity and fitness tracking application that h
 
 🌐 **Live Demo:** [trackify-v1.vercel.app](https://trackify-v1.vercel.app/)
 
-![Trackify Dashboard](https://via.placeholder.com/800x400/89CFF0/ffffff?text=Trackify+Dashboard)
-
 ## ✨ Features
 
 ### 🤖 AI-Powered Motivation Coach
@@ -121,20 +119,6 @@ trackify/
 ├── functions/            # Firebase Cloud Functions
 └── docs/                 # Documentation
 ```
-
-## 📱 Screenshots
-
-### Dashboard
-Track your daily progress, view AI motivation, and see consistency trends.
-
-### Goals & Tasks
-Create goals and break them down into actionable daily tasks.
-
-### Workouts
-Log workouts and track your fitness journey with streak bonuses.
-
-### Analytics
-Visualize your progress with comprehensive charts and insights.
 
 ## 🤝 Contributing
 
