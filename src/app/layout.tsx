@@ -35,7 +35,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${ptSans.variable} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
